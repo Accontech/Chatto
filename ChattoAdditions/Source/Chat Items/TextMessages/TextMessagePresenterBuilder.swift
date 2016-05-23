@@ -46,7 +46,7 @@ public class TextMessagePresenterBuilder<ViewModelBuilderT, InteractionHandlerT 
     let interactionHandler: InteractionHandlerT?
     let layoutCache = NSCache()
 
-    lazy var sizingCell: TextMessageCollectionViewCell = {
+    public lazy var sizingCell: TextMessageCollectionViewCell = {
         var cell: TextMessageCollectionViewCell? = nil
         if NSThread.isMainThread() {
             cell = TextMessageCollectionViewCell.sizingCell()
