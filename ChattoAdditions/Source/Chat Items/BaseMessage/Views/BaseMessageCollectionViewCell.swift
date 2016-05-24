@@ -347,13 +347,13 @@ struct BaseMessageLayoutModel {
             self.bubbleViewFrame.origin.x = currentX
         } else {
             currentX = containerRect.maxX - horizontalMargin
-            currentX -= failedButtonSize.width
             if isFailed {
+                currentX -= failedButtonSize.width
                 self.failedViewFrame.origin.x = currentX
+                currentX -= horizontalInterspacing
             } else {
                 self.failedViewFrame.origin.x = containerRect.width - -failedButtonSize.width
             }
-            currentX -= horizontalInterspacing
             currentX -= bubbleSize.width
             self.bubbleViewFrame.origin.x = currentX
         }
