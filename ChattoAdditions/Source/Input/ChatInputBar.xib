@@ -23,6 +23,10 @@
                         <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WNX-pj-5AB" customClass="HorizontalStackScrollView" customModule="BMAChatFrameworkAdditions" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="0.0" width="514" height="44"/>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <gestureRecognizers/>
+                            <connections>
+                                <outletCollection property="gestureRecognizers" destination="pmi-PL-5Zp" appends="YES" id="395-xn-znS"/>
+                            </connections>
                         </scrollView>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hE9-hU-Ci1">
                             <rect key="frame" x="534" y="-79" width="46" height="123"/>
@@ -92,5 +96,6 @@
             </connections>
             <point key="canvasLocation" x="-341" y="68.5"/>
         </view>
+        <tapGestureRecognizer enabled="NO" id="pmi-PL-5Zp"/>
     </objects>
 </document>
