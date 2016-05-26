@@ -35,8 +35,8 @@ import Foundation
         var button = UIButton(type: .Custom)
         button.exclusiveTouch = true
         button.setImage(UIImage(named: "camera-icon-unselected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil), forState: .Normal)
-        button.setImage(UIImage(named: "camera-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil), forState: .Highlighted)
-        button.setImage(UIImage(named: "camera-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil), forState: .Selected)
+        button.setImage(UIImage(named: "camera-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil)?.imageWithRenderingMode(.AlwaysTemplate), forState: .Highlighted)
+        button.setImage(UIImage(named: "camera-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil)?.imageWithRenderingMode(.AlwaysTemplate), forState: .Selected)
         return button
     }()
 
