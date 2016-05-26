@@ -96,6 +96,6 @@
             </connections>
             <point key="canvasLocation" x="-341" y="68.5"/>
         </view>
-        <tapGestureRecognizer enabled="NO" id="pmi-PL-5Zp"/>
+        <tapGestureRecognizer id="pmi-PL-5Zp"/>
     </objects>
 </document>
