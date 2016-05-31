@@ -39,7 +39,7 @@ public class TextMessageCollectionViewCellDefaultStyle: TextMessageCollectionVie
     }()
 
     lazy var font = {
-        return UIFont.systemFontOfSize(16)
+        return UIFont.systemFontOfSize(18)
     }()
 
     public func textFont(viewModel viewModel: TextMessageViewModelProtocol, isSelected: Bool) -> UIFont {
