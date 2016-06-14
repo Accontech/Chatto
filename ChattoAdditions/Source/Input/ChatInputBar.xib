@@ -12,7 +12,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" verticalHuggingPriority="249" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="fsh-hH-hKG" userLabel="TextView" customClass="ExpandableTextView" customModule="BMAChatFrameworkAdditions" customModuleProvider="target">
-                    <rect key="frame" x="0.0" y="0.0" width="514" height="79"/>
+                    <rect key="frame" x="0.0" y="0.0" width="600" height="79"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -29,7 +29,7 @@
                             </connections>
                         </scrollView>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hE9-hU-Ci1">
-                            <rect key="frame" x="534" y="-79" width="46" height="123"/>
+                            <rect key="frame" x="534" y="0.0" width="46" height="44"/>
                             <state key="normal" title="Button"/>
                             <connections>
                                 <action selector="buttonTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="9hi-0N-Y5F"/>
@@ -40,6 +40,7 @@
                     <constraints>
                         <constraint firstAttribute="trailing" secondItem="hE9-hU-Ci1" secondAttribute="trailing" constant="20" id="ABn-ah-JYL"/>
                         <constraint firstItem="WNX-pj-5AB" firstAttribute="leading" secondItem="hkz-tq-X6j" secondAttribute="leading" id="Jk5-7M-Mh8"/>
+                        <constraint firstItem="hE9-hU-Ci1" firstAttribute="top" secondItem="hkz-tq-X6j" secondAttribute="top" id="KsA-Bb-G4V"/>
                         <constraint firstItem="hE9-hU-Ci1" firstAttribute="leading" secondItem="WNX-pj-5AB" secondAttribute="trailing" constant="20" id="M1Q-jh-zRz"/>
                         <constraint firstItem="WNX-pj-5AB" firstAttribute="top" secondItem="hkz-tq-X6j" secondAttribute="top" id="QdZ-iC-yJd"/>
                         <constraint firstAttribute="trailing" secondItem="WNX-pj-5AB" secondAttribute="trailing" id="ciR-Nt-1tI"/>
@@ -62,20 +63,18 @@
                 </view>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <color key="tintColor" red="0.2784313725" green="0.62745098040000002" blue="0.85882352939999995" alpha="1" colorSpace="calibratedRGB"/>
             <constraints>
                 <constraint firstItem="fsh-hH-hKG" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="0hb-TC-77u"/>
                 <constraint firstItem="hkz-tq-X6j" firstAttribute="top" secondItem="fsh-hH-hKG" secondAttribute="bottom" id="4Vl-vV-gaa"/>
-                <constraint firstItem="hE9-hU-Ci1" firstAttribute="height" secondItem="iN0-l3-epB" secondAttribute="height" id="TEE-eW-656"/>
+                <constraint firstAttribute="bottom" secondItem="hkz-tq-X6j" secondAttribute="bottom" id="HFl-3K-Xpk"/>
                 <constraint firstAttribute="trailing" secondItem="hkz-tq-X6j" secondAttribute="trailing" id="V4u-Kv-Ub2"/>
                 <constraint firstItem="fsh-hH-hKG" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="ZsI-iu-9nR"/>
                 <constraint firstItem="hkz-tq-X6j" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="eGb-Fb-2Of"/>
                 <constraint firstItem="hkz-tq-X6j" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="gpt-vU-KzZ"/>
-                <constraint firstItem="hE9-hU-Ci1" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="kWd-zS-mbJ"/>
                 <constraint firstAttribute="trailing" secondItem="b1n-fp-7di" secondAttribute="trailing" id="lmb-AV-eyD"/>
                 <constraint firstItem="b1n-fp-7di" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="mci-2b-Z7f"/>
                 <constraint firstItem="b1n-fp-7di" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="sKU-B2-FjZ"/>
-                <constraint firstItem="hE9-hU-Ci1" firstAttribute="leading" secondItem="fsh-hH-hKG" secondAttribute="trailing" constant="20" id="uFP-wM-gVj"/>
+                <constraint firstAttribute="trailing" secondItem="fsh-hH-hKG" secondAttribute="trailing" id="vVY-rg-Rwc"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <nil key="simulatedTopBarMetrics"/>
