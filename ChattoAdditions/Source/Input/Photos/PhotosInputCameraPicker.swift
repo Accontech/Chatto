@@ -30,8 +30,8 @@ class PhotosInputCameraPicker: NSObject {
         self.presentingController = presentingController
     }
 
-    private var requestImageCompletion: ((UIImage?) -> Void)?
-    func requestImage(completion: (UIImage?) -> Void) {
+    private var requestImageCompletion: ((NSURL?) -> Void)?
+    func requestImage(completion: (NSURL?) -> Void) {
         guard UIImagePickerController.isSourceTypeAvailable(.Camera) else {
             completion(nil)
             return
@@ -49,7 +49,7 @@ class PhotosInputCameraPicker: NSObject {
         presentingController.presentViewController(controller, animated: true, completion:nil)
     }
 
-    private func finishPickingImage(image: UIImage?, fromPicker picker: UIImagePickerController) {
+    private func finishPickingImage(image: NSURL?, fromPicker picker: UIImagePickerController) {
         picker.dismissViewControllerAnimated(true, completion: nil)
         self.requestImageCompletion?(image)
     }
@@ -57,7 +57,15 @@ class PhotosInputCameraPicker: NSObject {
 
 extension PhotosInputCameraPicker: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage, editingInfo: [String : AnyObject]?) {
-        self.finishPickingImage(image, fromPicker: picker)
+        if let data = UIImageJPEGRepresentation(image, 1.0) {
+            let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .AllDomainsMask, true)[0]
+            let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("image\(arc4random()%1000)d").URLByAppendingPathExtension("jpg")
+            if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
+                try! NSFileManager.defaultManager().removeItemAtPath(outputURL.absoluteString)
+            }
+            data.writeToURL(outputURL, atomically: true)
+            self.finishPickingImage(outputURL, fromPicker: picker)
+        }
     }
 
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {

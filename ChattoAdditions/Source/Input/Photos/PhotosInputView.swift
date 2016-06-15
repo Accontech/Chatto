@@ -32,7 +32,7 @@ protocol PhotosInputViewProtocol {
 }
 
 protocol PhotosInputViewDelegate: class {
-    func inputView(inputView: PhotosInputViewProtocol, didSelectImage image: UIImage)
+    func inputView(inputView: PhotosInputViewProtocol, didSelectImage url: NSURL?)
 }
 
 class PhotosInputView: UIView, PhotosInputViewProtocol {
@@ -174,8 +174,8 @@ extension PhotosInputView: UICollectionViewDelegateFlowLayout {
                 }
             }
         } else {
-            self.dataProvider.requestFullImageAtIndex(indexPath.item - 1) { image in
-                self.delegate?.inputView(self, didSelectImage: image)
+            self.dataProvider.requestFileURLAtIndex(indexPath.item - 1) { url in
+                self.delegate?.inputView(self, didSelectImage: url)
             }
         }
     }

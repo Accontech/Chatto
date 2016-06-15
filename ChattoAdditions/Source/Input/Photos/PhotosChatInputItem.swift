@@ -25,7 +25,7 @@
 import Foundation
 
 @objc public class PhotosChatInputItem: NSObject {
-    public var photoInputHandler: ((UIImage) -> Void)?
+    public var photoInputHandler: ((NSURL?) -> Void)?
     public weak var presentingController: UIViewController?
     public init(presentingController: UIViewController?) {
         self.presentingController = presentingController
@@ -75,7 +75,7 @@ extension PhotosChatInputItem : ChatInputItemProtocol {
     }
 
     public func handleInput(input: AnyObject) {
-        if let image = input as? UIImage {
+        if let image = input as? NSURL {
             self.photoInputHandler?(image)
         }
     }
@@ -83,7 +83,7 @@ extension PhotosChatInputItem : ChatInputItemProtocol {
 
 // MARK: - PhotosChatInputCollectionViewWrapperDelegate
 extension PhotosChatInputItem: PhotosInputViewDelegate {
-    func inputView(inputView: PhotosInputViewProtocol, didSelectImage image: UIImage) {
-        self.photoInputHandler?(image)
+    func inputView(inputView: PhotosInputViewProtocol, didSelectImage url: NSURL?) {
+        self.photoInputHandler?(url)
     }
 }
