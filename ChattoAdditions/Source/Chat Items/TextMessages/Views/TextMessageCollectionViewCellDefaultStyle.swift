@@ -79,13 +79,6 @@ public class TextMessageCollectionViewCellDefaultStyle: TextMessageCollectionVie
     private func createImage(templateImage image: UIImage, isIncoming: Bool, status: MessageViewModelStatus, isSelected: Bool) -> UIImage {
         var color = isIncoming ? self.baseStyle.baseColorIncoming : self.baseStyle.baseColorOutgoing
 
-        switch status {
-        case .Success:
-            break
-        case .Failed, .Sending:
-            color = color.bma_blendWithColor(UIColor.whiteColor().colorWithAlphaComponent(0.70))
-        }
-
         if isSelected {
             color = color.bma_blendWithColor(UIColor.blackColor().colorWithAlphaComponent(0.10))
         }
@@ -114,6 +107,8 @@ public class TextMessageCollectionViewCellDefaultStyle: TextMessageCollectionVie
             return "ok"
         case .Sending:
             return "sending"
+        case .Sent:
+            return "sent"
         case .Failed:
             return "failed"
         }
