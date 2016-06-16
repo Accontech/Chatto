@@ -23,6 +23,7 @@
 */
 
 import UIKit
+import MobileCoreServices
 
 class PhotosInputCameraPicker: NSObject {
     weak var presentingController: UIViewController?
@@ -46,7 +47,12 @@ class PhotosInputCameraPicker: NSObject {
         let controller = UIImagePickerController()
         controller.delegate = self
         controller.sourceType = .Camera
-        presentingController.presentViewController(controller, animated: true, completion:nil)
+        if let mediaTypes = UIImagePickerController.availableMediaTypesForSourceType(.Camera) {
+            controller.mediaTypes = mediaTypes
+            presentingController.presentViewController(controller, animated: true, completion:nil)
+        } else {
+            print("no media types available for camera source")
+        }
     }
 
     private func finishPickingImage(image: NSURL?, fromPicker picker: UIImagePickerController) {
