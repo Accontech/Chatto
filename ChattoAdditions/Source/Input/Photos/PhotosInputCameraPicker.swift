@@ -62,15 +62,22 @@ class PhotosInputCameraPicker: NSObject {
 }
 
 extension PhotosInputCameraPicker: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage, editingInfo: [String : AnyObject]?) {
-        if let data = UIImageJPEGRepresentation(image, 1.0) {
-            let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .AllDomainsMask, true)[0]
-            let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("image\(arc4random()%1000)d").URLByAppendingPathExtension("jpg")
-            if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
-                try! NSFileManager.defaultManager().removeItemAtPath(outputURL.absoluteString)
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]?) {
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .AllDomainsMask, true)[0]
+        //guard let info = info else { return }
+        if info![UIImagePickerControllerMediaType] as! String == kUTTypeImage as String {
+            if let image = info![UIImagePickerControllerOriginalImage] as? UIImage, data = UIImageJPEGRepresentation(image, 1.0) {
+                let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("image\(arc4random()%1000)d").URLByAppendingPathExtension("jpg")
+                if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
+                    try! NSFileManager.defaultManager().removeItemAtPath(outputURL.absoluteString)
+                }
+                data.writeToURL(outputURL, atomically: true)
+                self.finishPickingImage(outputURL, fromPicker: picker)
             }
-            data.writeToURL(outputURL, atomically: true)
-            self.finishPickingImage(outputURL, fromPicker: picker)
+        } else if info![UIImagePickerControllerMediaType] as! String == kUTTypeMovie as String{
+            if let outputURL = info![UIImagePickerControllerMediaURL] as? NSURL {
+                self.finishPickingImage(outputURL, fromPicker: picker)
+            }
         }
     }
 
