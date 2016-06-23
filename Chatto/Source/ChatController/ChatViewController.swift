@@ -64,6 +64,10 @@ public class ChatViewController: UIViewController, UICollectionViewDataSource, U
         self.collectionView.dataSource = nil
     }
 
+    public override func loadView() {
+        self.view = BaseChatViewControllerView() // http://stackoverflow.com/questions/24596031/uiviewcontroller-with-inputaccessoryview-is-not-deallocated
+        self.view.backgroundColor = UIColor.whiteColor()
+    }
     override public func viewDidLoad() {
         super.viewDidLoad()
         self.addCollectionView()
@@ -129,13 +133,10 @@ public class ChatViewController: UIViewController, UICollectionViewDataSource, U
         self.inputContainer.addConstraint(NSLayoutConstraint(item: self.inputContainer, attribute: .Trailing, relatedBy: .Equal, toItem: inputView, attribute: .Trailing, multiplier: 1, constant: 0))
 
         self.keyboardTracker = KeyboardTracker(viewController: self, inputContainer: self.inputContainer, inputContainerBottomContraint: self.inputContainerBottomConstraint, notificationCenter: self.notificationCenter)
+        (self.view as? BaseChatViewControllerView)?.bmaInputAccessoryView = self.keyboardTracker.trackingView
     }
     var notificationCenter = NSNotificationCenter.defaultCenter()
     var keyboardTracker: KeyboardTracker!
-
-    public override var inputAccessoryView: UIView {
-        return self.keyboardTracker.trackingView
-    }
 
     public var isFirstLayout: Bool = true
     override public func viewDidLayoutSubviews() {

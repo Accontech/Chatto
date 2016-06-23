@@ -45,6 +45,7 @@ extension ChatViewController: ChatDataSourceDelegateProtocol {
 
             let oldItems = sSelf.decoratedChatItems.map { $0.chatItem }
             sSelf.updateModels(newItems: newItems, oldItems: oldItems, context: context, completion: {
+                guard let sSelf = self else { return }
                 if sSelf.updateQueue.isEmpty {
                     sSelf.enqueueMessageCountReductionIfNeeded()
                 }
@@ -129,14 +130,14 @@ extension ChatViewController: ChatDataSourceDelegateProtocol {
             if context == .Normal {
 
                 UIView.animateWithDuration(self.constants.updatesAnimationDuration, animations: { () -> Void in
-                    // We want to update visible cells to support easy removal of bubble tail or any other updates that may be needed after a data update
-                    // Collection view state is not constistent after performBatchUpdates. It can happen that we ask a cell for an index path and we still get the old one.
-                    // Visible cells can be either updated in completion block (easier but with delay) or before, taking into account if some cell is gonna be moved
-
-                    updateModelClosure()
-                    self.updateVisibleCells(changes)
-
                     self.collectionView.performBatchUpdates({ () -> Void in
+                        // We want to update visible cells to support easy removal of bubble tail or any other updates that may be needed after a data update
+                        // Collection view state is not constistent after performBatchUpdates. It can happen that we ask a cell for an index path and we still get the old one.
+                        // Visible cells can be either updated in completion block (easier but with delay) or before, taking into account if some cell is gonna be moved
+
+                        updateModelClosure()
+                        self.updateVisibleCells(changes)
+
                         self.collectionView.deleteItemsAtIndexPaths(Array(changes.deletedIndexPaths))
                         self.collectionView.insertItemsAtIndexPaths(Array(changes.insertedIndexPaths))
                         for move in changes.movedIndexPaths {
