@@ -23,6 +23,7 @@
 */
 
 import UIKit
+import MobileCoreServices
 
 class PhotosInputCameraPicker: NSObject {
     weak var presentingController: UIViewController?
@@ -30,8 +31,8 @@ class PhotosInputCameraPicker: NSObject {
         self.presentingController = presentingController
     }
 
-    private var requestImageCompletion: ((UIImage?) -> Void)?
-    func requestImage(completion: (UIImage?) -> Void) {
+    private var requestImageCompletion: ((NSURL?) -> Void)?
+    func requestImage(completion: (NSURL?) -> Void) {
         guard UIImagePickerController.isSourceTypeAvailable(.Camera) else {
             completion(nil)
             return
@@ -46,18 +47,38 @@ class PhotosInputCameraPicker: NSObject {
         let controller = UIImagePickerController()
         controller.delegate = self
         controller.sourceType = .Camera
-        presentingController.presentViewController(controller, animated: true, completion:nil)
+        if let mediaTypes = UIImagePickerController.availableMediaTypesForSourceType(.Camera) {
+            controller.mediaTypes = mediaTypes
+            presentingController.presentViewController(controller, animated: true, completion:nil)
+        } else {
+            print("no media types available for camera source")
+        }
     }
 
-    private func finishPickingImage(image: UIImage?, fromPicker picker: UIImagePickerController) {
+    private func finishPickingImage(image: NSURL?, fromPicker picker: UIImagePickerController) {
         picker.dismissViewControllerAnimated(true, completion: nil)
         self.requestImageCompletion?(image)
     }
 }
 
 extension PhotosInputCameraPicker: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage, editingInfo: [String : AnyObject]?) {
-        self.finishPickingImage(image, fromPicker: picker)
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]?) {
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .AllDomainsMask, true)[0]
+        //guard let info = info else { return }
+        if info![UIImagePickerControllerMediaType] as! String == kUTTypeImage as String {
+            if let image = info![UIImagePickerControllerOriginalImage] as? UIImage, data = UIImageJPEGRepresentation(image, 1.0) {
+                let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("image\(arc4random()%1000)d").URLByAppendingPathExtension("jpg")
+                if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
+                    try! NSFileManager.defaultManager().removeItemAtPath(outputURL.absoluteString)
+                }
+                data.writeToURL(outputURL, atomically: true)
+                self.finishPickingImage(outputURL, fromPicker: picker)
+            }
+        } else if info![UIImagePickerControllerMediaType] as! String == kUTTypeMovie as String{
+            if let outputURL = info![UIImagePickerControllerMediaURL] as? NSURL {
+                self.finishPickingImage(outputURL, fromPicker: picker)
+            }
+        }
     }
 
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {

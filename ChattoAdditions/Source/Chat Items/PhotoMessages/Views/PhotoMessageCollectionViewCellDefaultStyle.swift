@@ -36,7 +36,7 @@ public class PhotoMessageCollectionViewCellDefaultStyle: PhotoMessageCollectionV
         let placeholderIconTintOugoing = UIColor.bma_color(rgb: 0x508dfc)
         let progressIndicatorColorIncoming = UIColor.bma_color(rgb: 0x98a3ab)
         let progressIndicatorColorOutgoing = UIColor.whiteColor()
-        let overlayColor = UIColor.blackColor().colorWithAlphaComponent(0.70)
+        let overlayColor = UIColor.blackColor().colorWithAlphaComponent(0.00)
     }
 
     lazy private var styleConstants = Constants()

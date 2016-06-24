@@ -37,7 +37,7 @@ protocol LiveCameraCaptureSessionProtocol {
 class LiveCameraCell: UICollectionViewCell {
 
     private struct Constants {
-        static let backgroundColor = UIColor(red: 24.0/255.0, green: 101.0/255.0, blue: 245.0/255.0, alpha: 1)
+        static let backgroundColor = UIColor(red: 71.0/255.0, green: 160.0/255.0, blue: 219.0/255.0, alpha: 1)
         static let cameraImageName = "camera"
         static let lockedCameraImageName = "camera_lock"
     }

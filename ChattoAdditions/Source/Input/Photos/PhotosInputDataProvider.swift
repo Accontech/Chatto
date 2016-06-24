@@ -27,7 +27,7 @@ import PhotosUI
 protocol PhotosInputDataProviderProtocol {
     var count: Int { get }
     func requestPreviewImageAtIndex(index: Int, targetSize: CGSize, completion: (UIImage) -> Void) -> Int32
-    func requestFullImageAtIndex(index: Int, completion: (UIImage) -> Void)
+    func requestFileURLAtIndex(index: Int, completion: (NSURL?) -> Void)
     func cancelPreviewImageRequest(requestID: Int32)
 }
 
@@ -40,7 +40,7 @@ class PhotosInputPlaceholderDataProvider: PhotosInputDataProviderProtocol {
         return 0
     }
 
-    func requestFullImageAtIndex(index: Int, completion: (UIImage) -> Void) {
+    func requestFileURLAtIndex(index: Int, completion: (NSURL?) -> Void) {
     }
 
     func cancelPreviewImageRequest(requestID: Int32) {
@@ -53,7 +53,7 @@ class PhotosInputDataProvider: PhotosInputDataProviderProtocol {
     init() {
         let options = PHFetchOptions()
         options.sortDescriptors = [ NSSortDescriptor(key: "modificationDate", ascending: false) ]
-        self.fetchResult = PHAsset.fetchAssetsWithMediaType(.Image, options: options)
+        self.fetchResult = PHAsset.fetchAssetsWithOptions(options)
     }
 
     var count: Int {
@@ -76,12 +76,41 @@ class PhotosInputDataProvider: PhotosInputDataProviderProtocol {
         self.imageManager.cancelImageRequest(requestID)
     }
 
-    func requestFullImageAtIndex(index: Int, completion: (UIImage) -> Void) {
+    func requestFileURLAtIndex(index: Int, completion: (NSURL?) -> Void) {
         assert(index >= 0 && index < self.fetchResult.count, "Index out of bounds")
         let asset = self.fetchResult[index] as! PHAsset
-        self.imageManager.requestImageDataForAsset(asset, options: .None) { (data, dataUTI, orientation, info) -> Void in
-            if let data = data, image = UIImage(data: data) {
-                completion(image)
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .AllDomainsMask, true)[0]
+        if asset.mediaType == .Video {
+            let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .AllDomainsMask, true)[0]
+            let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("mergeVideo\(arc4random()%1000)d").URLByAppendingPathExtension("mov")
+            if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
+                try! NSFileManager.defaultManager().removeItemAtPath(outputURL.absoluteString)
+            }
+            self.imageManager.requestExportSessionForVideo(asset, options: .None, exportPreset: AVAssetExportPresetMediumQuality) {(session, info) -> Void in
+                if let session = session {
+                    session.outputFileType = AVFileTypeQuickTimeMovie
+                    session.outputURL = outputURL
+                    session.exportAsynchronouslyWithCompletionHandler { () -> Void in
+                        if session.status == .Completed {
+                            completion(outputURL)
+                        } else {
+                            completion(nil)
+                        }
+                    }
+                } else {
+                    completion(nil)
+                }
+            }
+        } else if asset.mediaType == .Image {
+            self.imageManager.requestImageForAsset(asset, targetSize: PHImageManagerMaximumSize, contentMode: .AspectFit, options: .None) { (image, info) -> Void in
+                if let image = image, data = UIImageJPEGRepresentation(image, 1.0) {
+                    let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("image\(arc4random()%1000)d").URLByAppendingPathExtension("jpg")
+                    if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
+                        try! NSFileManager.defaultManager().removeItemAtPath(outputURL.absoluteString)
+                    }
+                    data.writeToURL(outputURL, atomically: true)
+                    completion(outputURL)
+                }
             }
         }
     }

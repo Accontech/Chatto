@@ -25,7 +25,7 @@
 import Foundation
 
 @objc public class PhotosChatInputItem: NSObject {
-    public var photoInputHandler: ((UIImage) -> Void)?
+    public var photoInputHandler: ((NSURL?) -> Void)?
     public weak var presentingController: UIViewController?
     public init(presentingController: UIViewController?) {
         self.presentingController = presentingController
@@ -35,8 +35,8 @@ import Foundation
         var button = UIButton(type: .Custom)
         button.exclusiveTouch = true
         button.setImage(UIImage(named: "camera-icon-unselected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil), forState: .Normal)
-        button.setImage(UIImage(named: "camera-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil), forState: .Highlighted)
-        button.setImage(UIImage(named: "camera-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil), forState: .Selected)
+        button.setImage(UIImage(named: "camera-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil)?.imageWithRenderingMode(.AlwaysTemplate), forState: .Highlighted)
+        button.setImage(UIImage(named: "camera-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil)?.imageWithRenderingMode(.AlwaysTemplate), forState: .Selected)
         return button
     }()
 
@@ -75,7 +75,7 @@ extension PhotosChatInputItem : ChatInputItemProtocol {
     }
 
     public func handleInput(input: AnyObject) {
-        if let image = input as? UIImage {
+        if let image = input as? NSURL {
             self.photoInputHandler?(image)
         }
     }
@@ -83,7 +83,7 @@ extension PhotosChatInputItem : ChatInputItemProtocol {
 
 // MARK: - PhotosChatInputCollectionViewWrapperDelegate
 extension PhotosChatInputItem: PhotosInputViewDelegate {
-    func inputView(inputView: PhotosInputViewProtocol, didSelectImage image: UIImage) {
-        self.photoInputHandler?(image)
+    func inputView(inputView: PhotosInputViewProtocol, didSelectImage url: NSURL?) {
+        self.photoInputHandler?(url)
     }
 }

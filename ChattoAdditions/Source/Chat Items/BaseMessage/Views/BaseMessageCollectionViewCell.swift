@@ -32,9 +32,10 @@ public protocol BaseMessageCollectionViewCellStyleProtocol {
 }
 
 public struct BaseMessageCollectionViewCellLayoutConstants {
-    let horizontalMargin: CGFloat = 11
-    let horizontalInterspacing: CGFloat = 4
+    let horizontalMargin: CGFloat = 20
+    let horizontalInterspacing: CGFloat = 20
     let maxContainerWidthPercentageForBubbleView: CGFloat = 0.68
+    let profileImageHeight: CGFloat = 55
 }
 
 
@@ -225,7 +226,9 @@ public class BaseMessageCollectionViewCell<BubbleViewType where BubbleViewType:U
             maxContainerWidthPercentageForBubbleView: self.layoutConstants.maxContainerWidthPercentageForBubbleView,
             bubbleView: self.bubbleView,
             isIncoming: self.messageViewModel.isIncoming,
-            isFailed: self.messageViewModel.showsFailedIcon
+            isFailed: self.messageViewModel.showsFailedIcon,
+            showsTail: self.messageViewModel.showsTail,
+            profileImageHeight: self.layoutConstants.profileImageHeight
         )
         var layoutModel = BaseMessageLayoutModel()
         layoutModel.calculateLayout(parameters: parameters)
@@ -324,8 +327,7 @@ struct BaseMessageLayoutModel {
 
         let preferredWidthForBubble = containerWidth * parameters.maxContainerWidthPercentageForBubbleView
         let bubbleSize = bubbleView.sizeThatFits(CGSize(width: preferredWidthForBubble, height: CGFloat.max))
-        let containerRect = CGRect(origin: CGPoint.zero, size: CGSize(width: containerWidth, height: bubbleSize.height))
-
+        let containerRect = CGRect(origin: CGPoint.zero, size: CGSize(width: containerWidth, height: parameters.showsTail ? max(bubbleSize.height, parameters.profileImageHeight) : bubbleSize.height))
 
         self.bubbleViewFrame = bubbleSize.bma_rect(inContainer: containerRect, xAlignament: .Center, yAlignment: .Center, dx: 0, dy: 0)
         self.failedViewFrame = failedButtonSize.bma_rect(inContainer: containerRect, xAlignament: .Center, yAlignment: .Center, dx: 0, dy: 0)
@@ -337,11 +339,11 @@ struct BaseMessageLayoutModel {
             currentX = horizontalMargin
             if isFailed {
                 self.failedViewFrame.origin.x = currentX
-                currentX += failedButtonSize.width
-                currentX += horizontalInterspacing
             } else {
                 self.failedViewFrame.origin.x = -failedButtonSize.width
             }
+            currentX += failedButtonSize.width
+            currentX += horizontalInterspacing
             self.bubbleViewFrame.origin.x = currentX
         } else {
             currentX = containerRect.maxX - horizontalMargin
@@ -370,4 +372,6 @@ struct BaseMessageLayoutModelParameters {
     let bubbleView: UIView
     let isIncoming: Bool
     let isFailed: Bool
+    let showsTail: Bool
+    let profileImageHeight: CGFloat
 }

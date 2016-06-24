@@ -135,7 +135,7 @@ public final class PhotoBubbleView: UIView, MaximumLayoutWidthSpecificable, Back
     private func updateProgressIndicator() {
         let transferStatus = self.photoMessageViewModel.transferStatus.value
         let transferProgress = self.photoMessageViewModel.transferProgress.value
-        self.progressIndicatorView.hidden = [TransferStatus.Idle, TransferStatus.Success, TransferStatus.Failed].contains(self.photoMessageViewModel.transferStatus.value)
+        self.progressIndicatorView.hidden = [TransferStatus.Idle, TransferStatus.Success, TransferStatus.Failed].contains(self.photoMessageViewModel.transferStatus.value) || transferProgress == 1
         self.progressIndicatorView.progressLineColor = self.photoMessageStyle.progressIndicatorColor(viewModel: self.photoMessageViewModel)
         self.progressIndicatorView.progressLineWidth = 1
         self.progressIndicatorView.setProgress(CGFloat(transferProgress))

@@ -27,6 +27,7 @@ import Foundation
 public enum MessageViewModelStatus {
     case Success
     case Sending
+    case Sent
     case Failed
 }
 
@@ -37,6 +38,8 @@ public extension MessageStatus {
             return MessageViewModelStatus.Success
         case .Failed:
             return MessageViewModelStatus.Failed
+        case .Sent:
+            return MessageViewModelStatus.Sent
         case .Sending:
             return MessageViewModelStatus.Sending
         }
