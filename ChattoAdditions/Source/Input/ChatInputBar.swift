@@ -46,7 +46,7 @@ public class ChatInputBar: ReusableXibView {
 
     @IBOutlet var constraintsForVisibleSendButton: [NSLayoutConstraint]!
     @IBOutlet var constraintsForHiddenSendButton: [NSLayoutConstraint]!
-
+    
     class public func loadNib() -> ChatInputBar {
         let view = NSBundle(forClass: self).loadNibNamed(self.nibName(), owner: nil, options: nil).first as! ChatInputBar
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -65,6 +65,9 @@ public class ChatInputBar: ReusableXibView {
         self.textView.delegate = self
         self.scrollView.scrollsToTop = false
         self.sendButton.enabled = false
+        
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture))
+        textView.addGestureRecognizer(longPressRecognizer)
     }
 
     public override func updateConstraints() {
@@ -92,7 +95,39 @@ public class ChatInputBar: ReusableXibView {
             self.updateIntrinsicContentSizeAnimated()
         }
     }
-
+    
+    override public func canBecomeFirstResponder() -> Bool {
+        return true
+    }
+    
+    override public func canPerformAction(action: Selector, withSender sender: AnyObject?) -> Bool {
+        return (action == #selector(copy(_:)))
+    }
+    
+    // MARK: - UIResponderStandardEditActions
+    
+    override public func copy(sender: AnyObject?) {
+        UIPasteboard.generalPasteboard().string = textView.text
+    }
+    
+    // MARK: - UIGestureRecognizer
+    
+    func handleLongPressGesture(recognizer: UIGestureRecognizer) {
+        if let recognizerView = recognizer.view, recognizerSuperView = recognizerView.superview
+        {
+            let menuController = UIMenuController.sharedMenuController()
+            menuController.setTargetRect(recognizerView.frame, inView: recognizerSuperView)
+            menuController.setMenuVisible(true, animated:true)
+            recognizerView.becomeFirstResponder()
+        }
+    }
+    
+//paste
+/*        if let clipboardString = UIPasteboard.generalPasteboard().string {
+            textView.insertText(clipboardString)
+        }
+*/
+    
     public var showsSendButton: Bool = true {
         didSet {
             self.setNeedsUpdateConstraints()
