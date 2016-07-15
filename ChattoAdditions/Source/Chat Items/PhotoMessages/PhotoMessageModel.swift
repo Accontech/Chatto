@@ -25,13 +25,13 @@
 import UIKit
 
 public protocol PhotoMessageModelProtocol: DecoratedMessageModelProtocol {
-    var image: UIImage { get }
+    var image: UIImage? { get }
     var imageSize: CGSize { get }
 }
 
 public class PhotoMessageModel: PhotoMessageModelProtocol {
     public let messageModel: MessageModelProtocol
-    public let image: UIImage // fixme: URL
+    public let image: UIImage? // fixme: URL
     public let imageSize: CGSize
     public init(messageModel: MessageModelProtocol, imageSize: CGSize, image: UIImage) {
         self.messageModel = messageModel

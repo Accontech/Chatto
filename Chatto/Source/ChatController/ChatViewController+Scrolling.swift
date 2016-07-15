@@ -117,7 +117,9 @@ extension ChatViewController {
         guard self.autoLoadingEnabled, let dataSource = self.chatDataSource else { return }
 
         if self.isCloseToTop() && dataSource.hasMorePrevious {
-            dataSource.loadPrevious() {}
+            dataSource.loadPrevious({ [weak self] () -> Void in
+                self?.enqueueModelUpdate(context: .Pagination)
+            })
         } else if self.isCloseToBottom() && dataSource.hasMoreNext {
             dataSource.loadNext({ [weak self] () -> Void in
                 self?.enqueueModelUpdate(context: .Pagination)
