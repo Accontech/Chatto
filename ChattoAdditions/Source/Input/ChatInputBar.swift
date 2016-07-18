@@ -36,6 +36,12 @@ public class ChatInputBar: ReusableXibView {
 
     weak var delegate: ChatInputBarDelegate?
 
+    public var enableSend = true {
+        didSet {
+            self.sendButton.enabled = !self.textView.text.isEmpty && self.enableSend
+        }
+    }
+
     @IBOutlet weak var scrollView: HorizontalStackScrollView!
     @IBOutlet weak var textView: ExpandableTextView!
     @IBOutlet weak var sendButton: UIButton!
@@ -178,7 +184,7 @@ public class ChatInputBar: ReusableXibView {
         }
         set {
             self.textView.text = newValue
-            self.sendButton.enabled = !self.textView.text.isEmpty
+            self.sendButton.enabled = !self.textView.text.isEmpty && self.enableSend
         }
     }
 
@@ -238,7 +244,7 @@ extension ChatInputBar: UITextViewDelegate {
     }
 
     public func textViewDidChange(textView: UITextView) {
-        self.sendButton.enabled = !textView.text.isEmpty
+        self.sendButton.enabled = !textView.text.isEmpty && self.enableSend
     }
 }
 
