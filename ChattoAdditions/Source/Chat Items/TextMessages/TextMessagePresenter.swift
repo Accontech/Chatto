@@ -26,7 +26,6 @@ import UIKit
 
 public class TextMessagePresenter<ViewModelBuilderT, InteractionHandlerT where
     ViewModelBuilderT: ViewModelBuilderProtocol,
-    ViewModelBuilderT.ModelT: TextMessageModelProtocol,
     ViewModelBuilderT.ViewModelT: TextMessageViewModelProtocol,
     InteractionHandlerT: BaseMessageInteractionHandlerProtocol,
     InteractionHandlerT.ViewModelT == ViewModelBuilderT.ViewModelT>
@@ -66,7 +65,7 @@ public class TextMessagePresenter<ViewModelBuilderT, InteractionHandlerT where
         return collectionView.dequeueReusableCellWithReuseIdentifier(identifier, forIndexPath: indexPath)
     }
 
-    public override func configureCell(cell: BaseMessageCollectionViewCell<TextBubbleView>, decorationAttributes: ChatItemDecorationAttributes,  animated: Bool, additionalConfiguration: (() -> Void)?) {
+    public override func configureCell(cell: BaseMessageCollectionViewCell<TextBubbleView>, decorationAttributes: ChatItemDecorationAttributes, animated: Bool, additionalConfiguration: (() -> Void)?) {
         guard let cell = cell as? TextMessageCollectionViewCell else {
             assert(false, "Invalid cell received")
             return
@@ -85,11 +84,11 @@ public class TextMessagePresenter<ViewModelBuilderT, InteractionHandlerT where
     }
 
     public override func canPerformMenuControllerAction(action: Selector) -> Bool {
-        return action == "copy:"
+        return action == #selector(NSObject.copy(_:))
     }
 
     public override func performMenuControllerAction(action: Selector) {
-        if action == "copy:" {
+        if action == #selector(NSObject.copy(_:)) {
             UIPasteboard.generalPasteboard().string = self.messageViewModel.text
         } else {
             assert(false, "Unexpected action")

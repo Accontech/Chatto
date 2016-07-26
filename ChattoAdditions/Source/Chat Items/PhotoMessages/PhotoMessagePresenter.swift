@@ -26,13 +26,14 @@ import Foundation
 
 public class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT where
     ViewModelBuilderT: ViewModelBuilderProtocol,
-    ViewModelBuilderT.ModelT: PhotoMessageModelProtocol,
     ViewModelBuilderT.ViewModelT: PhotoMessageViewModelProtocol,
     InteractionHandlerT: BaseMessageInteractionHandlerProtocol,
     InteractionHandlerT.ViewModelT == ViewModelBuilderT.ViewModelT>
 : BaseMessagePresenter<PhotoBubbleView, ViewModelBuilderT, InteractionHandlerT> {
     public typealias ModelT = ViewModelBuilderT.ModelT
     public typealias ViewModelT = ViewModelBuilderT.ViewModelT
+
+    public let photoCellStyle: PhotoMessageCollectionViewCellStyleProtocol
 
     public init (
         messageModel: ModelT,
@@ -50,8 +51,6 @@ public class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT where
                 cellStyle: baseCellStyle
             )
     }
-
-    let photoCellStyle: PhotoMessageCollectionViewCellStyleProtocol
 
     public override class func registerCells(collectionView: UICollectionView) {
         collectionView.registerClass(PhotoMessageCollectionViewCell.self, forCellWithReuseIdentifier: "photo-message")
@@ -73,7 +72,7 @@ public class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT where
         return viewModel
     }
 
-    var photoCell: PhotoMessageCollectionViewCell? {
+    public var photoCell: PhotoMessageCollectionViewCell? {
         if let cell = self.cell {
             if let photoCell = cell as? PhotoMessageCollectionViewCell {
                 return photoCell
@@ -84,7 +83,7 @@ public class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT where
         return nil
     }
 
-    public override func configureCell(cell: BaseMessageCollectionViewCell<PhotoBubbleView>, decorationAttributes: ChatItemDecorationAttributes,  animated: Bool, additionalConfiguration: (() -> Void)?) {
+    public override func configureCell(cell: BaseMessageCollectionViewCell<PhotoBubbleView>, decorationAttributes: ChatItemDecorationAttributes, animated: Bool, additionalConfiguration: (() -> Void)?) {
         guard let cell = cell as? PhotoMessageCollectionViewCell else {
             assert(false, "Invalid cell received")
             return

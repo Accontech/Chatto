@@ -52,7 +52,7 @@ public protocol MessageViewModelProtocol: class { // why class? https://gist.git
     var showsFailedIcon: Bool { get }
     var date: String { get }
     var status: MessageViewModelStatus { get }
-    var messageModel: MessageModelProtocol { get }
+    var avatarImage: Observable<UIImage?> { set get }
 }
 
 public protocol DecoratedMessageViewModelProtocol: MessageViewModelProtocol {
@@ -83,8 +83,13 @@ extension DecoratedMessageViewModelProtocol {
         return self.messageViewModel.showsFailedIcon
     }
 
-    public var messageModel: MessageModelProtocol {
-        return self.messageViewModel.messageModel
+    public var avatarImage: Observable<UIImage?> {
+        get {
+            return self.messageViewModel.avatarImage
+        }
+        set {
+            self.messageViewModel.avatarImage = newValue
+        }
     }
 }
 
@@ -105,15 +110,18 @@ public class MessageViewModel: MessageViewModelProtocol {
     public let dateFormatter: NSDateFormatter
     public private(set) var messageModel: MessageModelProtocol
 
-    public init(dateFormatter: NSDateFormatter, showsTail: Bool, messageModel: MessageModelProtocol) {
+    public init(dateFormatter: NSDateFormatter, showsTail: Bool, messageModel: MessageModelProtocol, avatarImage: UIImage?) {
         self.dateFormatter = dateFormatter
         self.showsTail = showsTail
         self.messageModel = messageModel
+        self.avatarImage = Observable<UIImage?>(avatarImage)
     }
 
     public var showsFailedIcon: Bool {
         return self.status == .Failed
     }
+
+    public var avatarImage: Observable<UIImage?>
 }
 
 public class MessageViewModelDefaultBuilder {
@@ -122,11 +130,14 @@ public class MessageViewModelDefaultBuilder {
 
     static let dateFormatter: NSDateFormatter = {
         let formatter = NSDateFormatter()
-        formatter.dateFormat = "HH:mm"
+        formatter.locale = NSLocale.currentLocale()
+        formatter.dateStyle = .NoStyle
+        formatter.timeStyle = .ShortStyle
         return formatter
     }()
 
     public func createMessageViewModel(message: MessageModelProtocol) -> MessageViewModelProtocol {
-        return MessageViewModel(dateFormatter: self.dynamicType.dateFormatter, showsTail: false, messageModel: message)
+        // Override to use default avatarImage
+        return MessageViewModel(dateFormatter: MessageViewModelDefaultBuilder.dateFormatter, showsTail: false, messageModel: message, avatarImage: nil)
     }
 }
