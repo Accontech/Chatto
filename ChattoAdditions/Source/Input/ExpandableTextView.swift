@@ -45,7 +45,7 @@ public class ExpandableTextView: UITextView {
     }
 
     private func commonInit() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ExpandableTextView.textDidChange), name: UITextViewTextDidChangeNotification, object: self)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "textDidChange", name: UITextViewTextDidChangeNotification, object: self)
         self.configurePlaceholder()
         self.updatePlaceholderVisibility()
     }
@@ -93,21 +93,11 @@ public class ExpandableTextView: UITextView {
     func textDidChange() {
         self.updatePlaceholderVisibility()
         self.scrollToCaret()
-
-        if #available(iOS 9, *) {
-            // Bugfix:
-            // 1. Open keyboard
-            // 2. Paste very long text (so it snaps to nav bar and shows scroll indicators)
-            // 3. Select all and cut
-            // 4. Paste again: Texview it's smaller than it should be
-            self.scrollEnabled = false
-            self.scrollEnabled = true
-        }
     }
 
     private func scrollToCaret() {
-        if let textRange = self.selectedTextRange {
-            var rect = caretRectForPosition(textRange.end)
+        if selectedTextRange != nil {
+            var rect = caretRectForPosition(self.selectedTextRange!.end)
             rect = CGRect(origin: rect.origin, size: CGSize(width: rect.width, height: rect.height + textContainerInset.bottom))
 
             self.scrollRectToVisible(rect, animated: false)
@@ -115,7 +105,7 @@ public class ExpandableTextView: UITextView {
     }
 
     private func updatePlaceholderVisibility() {
-        if self.text == "" {
+        if text == "" {
             self.showPlaceholder()
         } else {
             self.hidePlaceholder()
@@ -123,7 +113,7 @@ public class ExpandableTextView: UITextView {
     }
 
     private func showPlaceholder() {
-        self.addSubview(self.placeholder)
+        self.addSubview(placeholder)
     }
 
     private func hidePlaceholder() {
@@ -135,8 +125,8 @@ public class ExpandableTextView: UITextView {
         self.placeholder.editable = false
         self.placeholder.selectable = false
         self.placeholder.userInteractionEnabled = false
-        self.placeholder.textAlignment = self.textAlignment
-        self.placeholder.textContainerInset = self.textContainerInset
+        self.placeholder.textAlignment = textAlignment
+        self.placeholder.textContainerInset = textContainerInset
         self.placeholder.backgroundColor = UIColor.clearColor()
     }
 }

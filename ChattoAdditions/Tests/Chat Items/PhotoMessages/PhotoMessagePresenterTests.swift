@@ -27,14 +27,14 @@ import XCTest
 
 class PhotoMessagePresenterTests: XCTestCase, UICollectionViewDataSource {
 
-    var presenter: PhotoMessagePresenter<PhotoMessageViewModelDefaultBuilder<PhotoMessageModel<MessageModel>>, PhotoMessageTestHandler>!
-    let decorationAttributes = ChatItemDecorationAttributes(bottomMargin: 0, showsTail: false, canShowAvatar: false)
+    var presenter: PhotoMessagePresenter<PhotoMessageViewModelDefaultBuilder, PhotoMessageTestHandler>!
+    let decorationAttributes = ChatItemDecorationAttributes(bottomMargin: 0, showsTail: false)
     let testImage = UIImage()
     override func setUp() {
-        let viewModelBuilder = PhotoMessageViewModelDefaultBuilder<PhotoMessageModel<MessageModel>>()
+        let viewModelBuilder = PhotoMessageViewModelDefaultBuilder()
         let sizingCell = PhotoMessageCollectionViewCell.sizingCell()
         let photoStyle = PhotoMessageCollectionViewCellDefaultStyle()
-        let baseStyle = BaseMessageCollectionViewCellDefaultStyle()
+        let baseStyle = BaseMessageCollectionViewCellDefaultSyle()
         let messageModel = MessageModel(uid: "uid", senderId: "senderId", type: "photo-message", isIncoming: true, date: NSDate(), status: .Success)
         let photoMessageModel = PhotoMessageModel(messageModel: messageModel, imageSize: CGSize(width: 30, height: 30), image: self.testImage)
         self.presenter = PhotoMessagePresenter(messageModel: photoMessageModel, viewModelBuilder: viewModelBuilder, interactionHandler: PhotoMessageTestHandler(), sizingCell: sizingCell, baseCellStyle: baseStyle, photoCellStyle: photoStyle)
@@ -57,7 +57,7 @@ class PhotoMessagePresenterTests: XCTestCase, UICollectionViewDataSource {
 
     func testThat_RegistersAndDequeuesCells() {
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: UICollectionViewFlowLayout())
-        PhotoMessagePresenter<PhotoMessageViewModelDefaultBuilder<PhotoMessageModel<MessageModel>>, PhotoMessageTestHandler>.registerCells(collectionView)
+        PhotoMessagePresenter<PhotoMessageViewModelDefaultBuilder, PhotoMessageTestHandler>.registerCells(collectionView)
         collectionView.dataSource = self
         collectionView.reloadData()
         XCTAssertNotNil(self.presenter.dequeueCell(collectionView: collectionView, indexPath: NSIndexPath(forItem: 0, inSection: 0)))
@@ -76,16 +76,11 @@ class PhotoMessagePresenterTests: XCTestCase, UICollectionViewDataSource {
 }
 
 class PhotoMessageTestHandler: BaseMessageInteractionHandlerProtocol {
-    typealias ViewModelT = PhotoMessageViewModel<PhotoMessageModel<MessageModel>>
+    typealias ViewModelT = PhotoMessageViewModel
 
     var didHandleTapOnFailIcon = false
-    func userDidTapOnFailIcon(viewModel viewModel: ViewModelT, failIconView: UIView) {
+    func userDidTapOnFailIcon(viewModel viewModel: ViewModelT) {
         self.didHandleTapOnFailIcon = true
-    }
-
-    var didHandleTapOnAvatar = false
-    func userDidTapOnAvatar(viewModel viewModel: ViewModelT) {
-        self.didHandleTapOnAvatar = true
     }
 
     var didHandleTapOnBubble = false
@@ -93,13 +88,8 @@ class PhotoMessageTestHandler: BaseMessageInteractionHandlerProtocol {
         self.didHandleTapOnBubble = true
     }
 
-    var didHandleBeginLongPressOnBubble = false
-    func userDidBeginLongPressOnBubble(viewModel viewModel: ViewModelT) {
-        self.didHandleBeginLongPressOnBubble = true
-    }
-
-    var didHandleEndLongPressOnBubble = false
-    func userDidEndLongPressOnBubble(viewModel viewModel: ViewModelT) {
-        self.didHandleEndLongPressOnBubble = true
+    var didHandleLongPressOnBubble = false
+    func userDidLongPressOnBubble(viewModel viewModel: ViewModelT) {
+        self.didHandleLongPressOnBubble = true
     }
 }

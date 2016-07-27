@@ -21,7 +21,7 @@
 
 ## How to use
 
-1. Subclass BaseChatViewController
+1. Subclass ChatViewController
 2. Override `createChatInputView()` to use `ChattoAdditions.ChatInputBar` or provide your own component
 3. Provide a data source with your messages
 4. Override `createPresenterBuilders()`. There will be a presenter for each message that will be responsible for the UI of that message.
@@ -31,7 +31,7 @@ override func createPresenterBuilders() -> [ChatItemType: [ChatItemPresenterBuil
     return [
         TextMessageModel.chatItemType: [
             TextMessagePresenterBuilder(
-                viewModelBuilder: TextMessageViewModelDefaultBuilder<TextMessageModel>(),
+                viewModelBuilder: TextMessageViewModelDefaultBuilder(),
                 interactionHandler: TextMessageHandler(baseHandler: self.baseMessageHandler)
             )
         ]

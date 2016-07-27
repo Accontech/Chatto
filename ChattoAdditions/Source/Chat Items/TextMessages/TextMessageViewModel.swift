@@ -28,31 +28,25 @@ public protocol TextMessageViewModelProtocol: DecoratedMessageViewModelProtocol 
     var text: String { get }
 }
 
-public class TextMessageViewModel<TextMessageModelT: TextMessageModelProtocol>: TextMessageViewModelProtocol {
-    public var text: String {
-        return self.textMessage.text
-    }
-    public let textMessage: TextMessageModelT
+public class TextMessageViewModel: TextMessageViewModelProtocol {
+    public let text: String
     public let messageViewModel: MessageViewModelProtocol
 
-    public init(textMessage: TextMessageModelT, messageViewModel: MessageViewModelProtocol) {
-        self.textMessage = textMessage
+    public init(text: String, messageViewModel: MessageViewModelProtocol) {
+        self.text = text
         self.messageViewModel = messageViewModel
     }
 }
 
-public class TextMessageViewModelDefaultBuilder<TextMessageModelT: TextMessageModelProtocol>: ViewModelBuilderProtocol {
+public class TextMessageViewModelDefaultBuilder: ViewModelBuilderProtocol {
     public init() { }
 
     let messageViewModelBuilder = MessageViewModelDefaultBuilder()
 
-    public func createViewModel(textMessage: TextMessageModelT) -> TextMessageViewModel<TextMessageModelT> {
-        let messageViewModel = self.messageViewModelBuilder.createMessageViewModel(textMessage)
-        let textMessageViewModel = TextMessageViewModel(textMessage: textMessage, messageViewModel: messageViewModel)
+    public func createViewModel(model: TextMessageModel) -> TextMessageViewModel {
+        let messageViewModel = self.messageViewModelBuilder.createMessageViewModel(model)
+        let textMessageViewModel = TextMessageViewModel(text: model.text, messageViewModel: messageViewModel)
         return textMessageViewModel
-    }
 
-    public func canCreateViewModel(fromModel model: Any) -> Bool {
-        return model is TextMessageModelT
     }
 }

@@ -35,13 +35,13 @@ public protocol PhotoBubbleViewStyleProtocol {
     func overlayColor(viewModel viewModel: PhotoMessageViewModelProtocol) -> UIColor?
 }
 
-public class PhotoBubbleView: UIView, MaximumLayoutWidthSpecificable, BackgroundSizingQueryable {
+public final class PhotoBubbleView: UIView, MaximumLayoutWidthSpecificable, BackgroundSizingQueryable {
 
     public var viewContext: ViewContext = .Normal
     public var animationDuration: CFTimeInterval = 0.33
     public var preferredMaxLayoutWidth: CGFloat = 0
 
-    public override init(frame: CGRect) {
+    override init(frame: CGRect) {
         super.init(frame: frame)
         self.commonInit()
     }
@@ -58,7 +58,7 @@ public class PhotoBubbleView: UIView, MaximumLayoutWidthSpecificable, Background
         self.addSubview(self.progressIndicatorView)
     }
 
-    public private(set) lazy var imageView: UIImageView = {
+    private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.autoresizingMask = .None
         imageView.clipsToBounds = true
@@ -76,7 +76,9 @@ public class PhotoBubbleView: UIView, MaximumLayoutWidthSpecificable, Background
         return view
     }()
 
-    public private(set) var progressIndicatorView: CircleProgressIndicatorView = {
+
+
+    private var progressIndicatorView: CircleProgressIndicatorView = {
         let progressView = CircleProgressIndicatorView(size: CGSize(width: 33, height: 33))
         return progressView
     }()
@@ -86,6 +88,7 @@ public class PhotoBubbleView: UIView, MaximumLayoutWidthSpecificable, Background
         imageView.autoresizingMask = .None
         return imageView
     }()
+
 
     public var photoMessageViewModel: PhotoMessageViewModelProtocol! {
         didSet {
@@ -119,7 +122,7 @@ public class PhotoBubbleView: UIView, MaximumLayoutWidthSpecificable, Background
         }
     }
 
-    public func updateViews() {
+    private func updateViews() {
         if self.viewContext == .Sizing { return }
         if isUpdating { return }
         guard let _ = self.photoMessageViewModel, _ = self.photoMessageStyle else { return }

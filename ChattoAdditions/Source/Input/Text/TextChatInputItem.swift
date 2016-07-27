@@ -24,27 +24,17 @@
 
 import Foundation
 
-public class TextChatInputItem {
-    typealias Class = TextChatInputItem
+@objc public class TextChatInputItem: NSObject {
     public var textInputHandler: ((String) -> Void)?
 
-    let buttonAppearance: TabInputButtonAppearance
-    public init(tabInputButtonAppearance: TabInputButtonAppearance = Class.createDefaultButtonAppearance()) {
-        self.buttonAppearance = tabInputButtonAppearance
-    }
-
-    public class func createDefaultButtonAppearance() -> TabInputButtonAppearance {
-        let images: [UIControlState: UIImage] = [
-            .Normal: UIImage(named: "text-icon-unselected", inBundle: NSBundle(forClass: TextChatInputItem.self), compatibleWithTraitCollection: nil)!,
-            .Selected: UIImage(named: "text-icon-selected", inBundle: NSBundle(forClass: TextChatInputItem.self), compatibleWithTraitCollection: nil)!.imageWithRenderingMode(.AlwaysTemplate),
-            .Highlighted: UIImage(named: "text-icon-selected", inBundle: NSBundle(forClass: TextChatInputItem.self), compatibleWithTraitCollection: nil)!.imageWithRenderingMode(.AlwaysTemplate)
-        ]
-        return TabInputButtonAppearance(images: images, size: nil)
-    }
-
-    lazy private var internalTabView: TabInputButton = {
-        return TabInputButton.makeInputButton(withAppearance: self.buttonAppearance)
-    }()
+    lazy private var internalTabView: UIButton = {
+        var button = UIButton(type: .Custom)
+        button.exclusiveTouch = true
+        button.setImage(UIImage(named: "text-icon-unselected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil), forState: .Normal)
+        button.setImage(UIImage(named: "text-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil)?.imageWithRenderingMode(.AlwaysTemplate), forState: .Highlighted)
+        button.setImage(UIImage(named: "text-icon-selected", inBundle: NSBundle(forClass: self.dynamicType), compatibleWithTraitCollection: nil)?.imageWithRenderingMode(.AlwaysTemplate), forState: .Selected)
+        return button
+        }()
 
     public var selected = false {
         didSet {

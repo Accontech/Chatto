@@ -31,23 +31,19 @@ class PhotosInputCameraPicker: NSObject {
         self.presentingController = presentingController
     }
 
-    private var completionBlocks: (onImageTaken: ((NSURL?) -> Void)?, onCameraPickerDismissed: (() -> Void)?)?
-
-    func presentCameraPicker(onImageTaken onImageTaken: (NSURL?) -> Void, onCameraPickerDismissed: () -> Void) {
+    private var requestImageCompletion: ((NSURL?) -> Void)?
+    func requestImage(completion: (NSURL?) -> Void) {
         guard UIImagePickerController.isSourceTypeAvailable(.Camera) else {
-            onImageTaken(nil)
-            onCameraPickerDismissed()
+            completion(nil)
             return
         }
 
         guard let presentingController = self.presentingController else {
-            onImageTaken(nil)
-            onCameraPickerDismissed()
-
+            completion(nil)
             return
         }
 
-        self.completionBlocks = (onImageTaken: onImageTaken, onCameraPickerDismissed: onCameraPickerDismissed)
+        self.requestImageCompletion = completion
         let controller = UIImagePickerController()
         controller.delegate = self
         controller.sourceType = .Camera

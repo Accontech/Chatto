@@ -26,23 +26,21 @@ import Foundation
 import Chatto
 
 public protocol ViewModelBuilderProtocol {
-    associatedtype ModelT: MessageModelProtocol
-    associatedtype ViewModelT: MessageViewModelProtocol
-    func canCreateViewModel(fromModel model: Any) -> Bool
+    typealias ModelT: MessageModelProtocol
+    typealias ViewModelT: MessageViewModelProtocol
     func createViewModel(model: ModelT) -> ViewModelT
 }
 
 public protocol BaseMessageInteractionHandlerProtocol {
-    associatedtype ViewModelT
-    func userDidTapOnFailIcon(viewModel viewModel: ViewModelT, failIconView: UIView)
-    func userDidTapOnAvatar(viewModel viewModel: ViewModelT)
+    typealias ViewModelT
+    func userDidTapOnFailIcon(viewModel viewModel: ViewModelT)
     func userDidTapOnBubble(viewModel viewModel: ViewModelT)
-    func userDidBeginLongPressOnBubble(viewModel viewModel: ViewModelT)
-    func userDidEndLongPressOnBubble(viewModel viewModel: ViewModelT)
+    func userDidLongPressOnBubble(viewModel viewModel: ViewModelT)
 }
 
 public class BaseMessagePresenter<BubbleViewT, ViewModelBuilderT, InteractionHandlerT where
     ViewModelBuilderT: ViewModelBuilderProtocol,
+    ViewModelBuilderT.ModelT: MessageModelProtocol,
     ViewModelBuilderT.ViewModelT: MessageViewModelProtocol,
     InteractionHandlerT: BaseMessageInteractionHandlerProtocol,
     InteractionHandlerT.ViewModelT == ViewModelBuilderT.ViewModelT,
@@ -64,11 +62,11 @@ public class BaseMessagePresenter<BubbleViewT, ViewModelBuilderT, InteractionHan
             self.interactionHandler = interactionHandler
     }
 
-    public let messageModel: ModelT
-    public let sizingCell: BaseMessageCollectionViewCell<BubbleViewT>
-    public let viewModelBuilder: ViewModelBuilderT
-    public let interactionHandler: InteractionHandlerT?
-    public let cellStyle: BaseMessageCollectionViewCellStyleProtocol
+    let messageModel: ModelT
+    let sizingCell: BaseMessageCollectionViewCell<BubbleViewT>
+    let viewModelBuilder: ViewModelBuilderT
+    let interactionHandler: InteractionHandlerT?
+    let cellStyle: BaseMessageCollectionViewCellStyleProtocol
 
     public private(set) final lazy var messageViewModel: ViewModelT = {
         return self.createViewModel()
@@ -93,41 +91,30 @@ public class BaseMessagePresenter<BubbleViewT, ViewModelBuilderT, InteractionHan
         self.configureCell(cell, decorationAttributes: decorationAttributes, animated: false, additionalConfiguration: nil)
     }
 
-    public var decorationAttributes: ChatItemDecorationAttributes!
+    var decorationAttributes: ChatItemDecorationAttributes!
     public func configureCell(cell: CellT, decorationAttributes: ChatItemDecorationAttributes, animated: Bool, additionalConfiguration: (() -> Void)?) {
         cell.performBatchUpdates({ () -> Void in
             self.messageViewModel.showsTail = decorationAttributes.showsTail
-            if !decorationAttributes.canShowAvatar {
-                self.messageViewModel.avatarImage.value = nil
-            }
             cell.bubbleView.userInteractionEnabled = true // just in case something went wrong while showing UIMenuController
             cell.baseStyle = self.cellStyle
             cell.messageViewModel = self.messageViewModel
             cell.onBubbleTapped = { [weak self] (cell) in
                 guard let sSelf = self else { return }
-                sSelf.onCellBubbleTapped()
+                sSelf.interactionHandler?.userDidTapOnBubble(viewModel: sSelf.messageViewModel)
             }
-            cell.onBubbleLongPressBegan = { [weak self] (cell) in
+            cell.onBubbleLongPressed = { [weak self] (cell) in
                 guard let sSelf = self else { return }
-                sSelf.onCellBubbleLongPressBegan()
-            }
-            cell.onBubbleLongPressEnded = { [weak self] (cell) in
-                guard let sSelf = self else { return }
-                sSelf.onCellBubbleLongPressEnded()
-            }
-            cell.onAvatarTapped = { [weak self] (cell) in
-                guard let sSelf = self else { return }
-                sSelf.onCellAvatarTapped()
+                sSelf.interactionHandler?.userDidLongPressOnBubble(viewModel: sSelf.messageViewModel)
             }
             cell.onFailedButtonTapped = { [weak self] (cell) in
                 guard let sSelf = self else { return }
-                sSelf.onCellFailedButtonTapped(cell.failedButton)
+                sSelf.interactionHandler?.userDidTapOnFailIcon(viewModel: sSelf.messageViewModel)
             }
             additionalConfiguration?()
         }, animated: animated, completion: nil)
     }
 
-    public override func heightForCell(maximumWidth width: CGFloat, decorationAttributes: ChatItemDecorationAttributesProtocol?) -> CGFloat {
+  public override func heightForCell(maximumWidth width: CGFloat, decorationAttributes: ChatItemDecorationAttributesProtocol?) -> CGFloat {
         guard let decorationAttributes = decorationAttributes as? ChatItemDecorationAttributes else {
             assert(false, "Expecting decoration attributes")
             return 0
@@ -147,7 +134,7 @@ public class BaseMessagePresenter<BubbleViewT, ViewModelBuilderT, InteractionHan
             return false
         }
         cell.bubbleView.userInteractionEnabled = false // This is a hack for UITextView, shouldn't harm to all bubbles
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(BaseMessagePresenter.willShowMenu(_:)), name: UIMenuControllerWillShowMenuNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "willShowMenu:", name: UIMenuControllerWillShowMenuNotification, object: nil)
         return true
     }
 
@@ -167,25 +154,5 @@ public class BaseMessagePresenter<BubbleViewT, ViewModelBuilderT, InteractionHan
     public func canShowMenu() -> Bool {
         // Override in subclass
         return false
-    }
-
-    public func onCellBubbleTapped() {
-        self.interactionHandler?.userDidTapOnBubble(viewModel: self.messageViewModel)
-    }
-
-    public func onCellBubbleLongPressBegan() {
-        self.interactionHandler?.userDidBeginLongPressOnBubble(viewModel: self.messageViewModel)
-    }
-
-    public func onCellBubbleLongPressEnded() {
-        self.interactionHandler?.userDidEndLongPressOnBubble(viewModel: self.messageViewModel)
-    }
-
-    public func onCellAvatarTapped() {
-        self.interactionHandler?.userDidTapOnAvatar(viewModel: self.messageViewModel)
-    }
-
-    public func onCellFailedButtonTapped(failedButtonView: UIView) {
-        self.interactionHandler?.userDidTapOnFailIcon(viewModel: self.messageViewModel, failIconView: failedButtonView)
     }
 }

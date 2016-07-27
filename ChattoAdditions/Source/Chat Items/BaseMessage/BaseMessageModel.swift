@@ -36,7 +36,7 @@ public protocol MessageModelProtocol: ChatItemProtocol {
     var senderId: String { get }
     var isIncoming: Bool { get }
     var date: NSDate { get }
-    var status: MessageStatus { get }
+    var status: MessageStatus { get set }
 }
 
 public protocol DecoratedMessageModelProtocol: MessageModelProtocol {
@@ -65,7 +65,12 @@ public extension DecoratedMessageModelProtocol {
     }
 
     var status: MessageStatus {
-        return self.messageModel.status
+        get {
+            return self.messageModel.status
+        }
+        set {
+            self.messageModel.status = newValue
+        }
     }
 }
 
