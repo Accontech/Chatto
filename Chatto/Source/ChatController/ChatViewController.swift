@@ -136,7 +136,7 @@ public class ChatViewController: UIViewController, UICollectionViewDataSource, U
         (self.view as? BaseChatViewControllerView)?.bmaInputAccessoryView = self.keyboardTracker.trackingView
     }
     var notificationCenter = NSNotificationCenter.defaultCenter()
-    var keyboardTracker: KeyboardTracker!
+    public var keyboardTracker: KeyboardTracker!
 
     public var isFirstLayout: Bool = true
     override public func viewDidLayoutSubviews() {
