@@ -39,6 +39,8 @@ public final class SerialTaskQueue: SerialTaskQueueProtocol {
     private var isStopped = true
     private var tasksQueue = [TaskClosure]()
 
+    public init() {}
+
     public func addTask(task: TaskClosure) {
         self.tasksQueue.append(task)
         self.maybeExecuteNextTask()
@@ -49,7 +51,7 @@ public final class SerialTaskQueue: SerialTaskQueueProtocol {
         self.maybeExecuteNextTask()
     }
 
-    func stop() {
+    public func stop() {
         self.isStopped = true
     }
 
