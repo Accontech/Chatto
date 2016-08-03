@@ -86,6 +86,7 @@ class PhotosInputDataProvider: NSObject, PhotosInputDataProviderProtocol, PHPhot
         let asset = self.fetchResult[index] as! PHAsset
         let options = PHImageRequestOptions()
         options.deliveryMode = .HighQualityFormat
+        options.networkAccessAllowed = true
         return self.imageManager.requestImageForAsset(asset, targetSize: targetSize, contentMode: .AspectFill, options: options) { (image, info) in
             if let image = image {
                 completion(image)
@@ -102,6 +103,8 @@ class PhotosInputDataProvider: NSObject, PhotosInputDataProviderProtocol, PHPhot
         let asset = self.fetchResult[index] as! PHAsset
         let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .AllDomainsMask, true)[0]
         if asset.mediaType == .Video {
+            let options = PHVideoRequestOptions()
+            options.networkAccessAllowed = true
             let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .AllDomainsMask, true)[0]
             let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("mergeVideo\(arc4random()%1000)d").URLByAppendingPathExtension("mov")
             if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
@@ -123,7 +126,9 @@ class PhotosInputDataProvider: NSObject, PhotosInputDataProviderProtocol, PHPhot
                 }
             }
         } else if asset.mediaType == .Image {
-            self.imageManager.requestImageForAsset(asset, targetSize: PHImageManagerMaximumSize, contentMode: .AspectFit, options: .None) { (image, info) -> Void in
+            let options = PHImageRequestOptions()
+            options.networkAccessAllowed = true
+            self.imageManager.requestImageForAsset(asset, targetSize: PHImageManagerMaximumSize, contentMode: .AspectFit, options: options) { (image, info) -> Void in
                 if let image = image, data = UIImageJPEGRepresentation(image, 1.0) {
                     let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("image\(arc4random()%1000)d").URLByAppendingPathExtension("jpg")
                     if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
