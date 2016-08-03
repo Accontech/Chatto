@@ -24,26 +24,27 @@
 
 import Foundation
 
-typealias TaskClosure = (completion: () -> Void) -> Void
+public typealias TaskClosure = (completion: () -> Void) -> Void
 
-protocol SerialTaskQueueProtocol {
+public protocol SerialTaskQueueProtocol {
     func addTask(task: TaskClosure)
     func start()
     func stop()
+    func flushQueue()
     var isEmpty: Bool { get }
 }
 
-final class SerialTaskQueue: SerialTaskQueueProtocol {
+public final class SerialTaskQueue: SerialTaskQueueProtocol {
     private var isBusy = false
     private var isStopped = true
     private var tasksQueue = [TaskClosure]()
 
-    func addTask(task: TaskClosure) {
+    public func addTask(task: TaskClosure) {
         self.tasksQueue.append(task)
         self.maybeExecuteNextTask()
     }
 
-    func start() {
+    public func start() {
         self.isStopped = false
         self.maybeExecuteNextTask()
     }
@@ -52,7 +53,11 @@ final class SerialTaskQueue: SerialTaskQueueProtocol {
         self.isStopped = true
     }
 
-    var isEmpty: Bool {
+    public func flushQueue() {
+        self.tasksQueue.removeAll()
+    }
+
+    public var isEmpty: Bool {
         return self.tasksQueue.isEmpty
     }
 
