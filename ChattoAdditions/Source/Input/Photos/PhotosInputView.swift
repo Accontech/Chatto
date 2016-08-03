@@ -32,7 +32,7 @@ protocol PhotosInputViewProtocol {
 }
 
 protocol PhotosInputViewDelegate: class {
-    func inputView(inputView: PhotosInputViewProtocol, didSelectImage image: UIImage)
+    func inputView(inputView: PhotosInputViewProtocol, didSelectImage url: NSURL?)
     func inputViewDidRequestCameraPermission(inputView: PhotosInputViewProtocol)
     func inputViewDidRequestPhotoLibraryPermission(inputView: PhotosInputViewProtocol)
 }

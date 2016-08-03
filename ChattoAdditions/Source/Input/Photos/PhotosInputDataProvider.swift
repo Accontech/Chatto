@@ -176,11 +176,11 @@ class PhotosInputWithPlaceholdersDataProvider: PhotosInputDataProviderProtocol, 
         }
     }
 
-    func requestFullImageAtIndex(index: Int, completion: (UIImage) -> Void) {
+    func requestFileURLAtIndex(index: Int, completion: (NSURL?) -> Void) {
         if index < self.photosDataProvider.count {
-            return self.photosDataProvider.requestFullImageAtIndex(index, completion: completion)
+            return self.photosDataProvider.requestFileURLAtIndex(index, completion: completion)
         } else {
-            return self.placeholdersDataProvider.requestFullImageAtIndex(index, completion: completion)
+            return self.placeholdersDataProvider.requestFileURLAtIndex(index, completion: completion)
         }
     }
 

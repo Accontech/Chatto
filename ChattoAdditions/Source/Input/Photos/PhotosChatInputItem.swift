@@ -25,8 +25,13 @@
 import Foundation
 
 @objc public class PhotosChatInputItem: NSObject {
+    typealias Class = PhotosChatInputItem
+
     public var photoInputHandler: ((NSURL?) -> Void)?
+    public var cameraPermissionHandler: (() -> Void)?
+    public var photosPermissionHandler: (() -> Void)?
     public weak var presentingController: UIViewController?
+
     public init(presentingController: UIViewController?) {
         self.presentingController = presentingController
     }
@@ -82,5 +87,13 @@ extension PhotosChatInputItem : ChatInputItemProtocol {
 extension PhotosChatInputItem: PhotosInputViewDelegate {
     func inputView(inputView: PhotosInputViewProtocol, didSelectImage url: NSURL?) {
         self.photoInputHandler?(url)
+    }
+
+    func inputViewDidRequestCameraPermission(inputView: PhotosInputViewProtocol) {
+        self.cameraPermissionHandler?()
+    }
+
+    func inputViewDidRequestPhotoLibraryPermission(inputView: PhotosInputViewProtocol) {
+        self.photosPermissionHandler?()
     }
 }
