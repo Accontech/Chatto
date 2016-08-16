@@ -88,7 +88,7 @@ public final class TextBubbleView: UIView, MaximumLayoutWidthSpecificable, Backg
     }()
 
     private var borderImageView: UIImageView = UIImageView()
-    private var textView: UITextView = {
+    public var textView: UITextView = {
         let textView = ChatMessageTextView()
         textView.backgroundColor = UIColor.clearColor()
         textView.editable = false
