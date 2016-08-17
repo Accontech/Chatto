@@ -67,8 +67,11 @@ class PhotosInputDataProvider: NSObject, PhotosInputDataProviderProtocol, PHPhot
     private var fetchResult: PHFetchResult!
     override init() {
         let options = PHFetchOptions()
-        options.sortDescriptors = [ NSSortDescriptor(key: "modificationDate", ascending: false) ]
-        self.fetchResult = PHAsset.fetchAssetsWithMediaType(.Image, options: options)
+        options.sortDescriptors = [ NSSortDescriptor(key: "creationDate", ascending: false) ]
+        if #available(iOS 9.0, *) {
+            options.includeAssetSourceTypes = [.TypeUserLibrary, .TypeiTunesSynced, .TypeNone, .TypeCloudShared]
+        }
+        self.fetchResult = PHAsset.fetchAssetsWithOptions(options)
         super.init()
         PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
     }
