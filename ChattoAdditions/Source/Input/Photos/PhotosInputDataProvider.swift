@@ -129,6 +129,9 @@ class PhotosInputDataProvider: NSObject, PhotosInputDataProviderProtocol, PHPhot
             let options = PHImageRequestOptions()
             options.networkAccessAllowed = true
             self.imageManager.requestImageForAsset(asset, targetSize: PHImageManagerMaximumSize, contentMode: .AspectFit, options: options) { (image, info) -> Void in
+                if let degraded = info?[PHImageResultIsDegradedKey]?.boolValue where degraded {
+                    return
+                }
                 if let image = image, data = UIImageJPEGRepresentation(image, 1.0) {
                     let outputURL = NSURL(fileURLWithPath: documentsPath).URLByAppendingPathComponent("image\(arc4random()%1000)d").URLByAppendingPathExtension("jpg")
                     if NSFileManager.defaultManager().fileExistsAtPath(outputURL.absoluteString) {
