@@ -25,25 +25,38 @@
 import AVFoundation
 import Foundation
 import UIKit
-import Chatto
 
-protocol LiveCameraCaptureSessionProtocol {
-    var captureLayer: AVCaptureVideoPreviewLayer? { get }
-    var isInitialized: Bool { get }
-    var isCapturing: Bool { get }
-    func startCapturing(completion: () -> Void)
-    func stopCapturing(completion: () -> Void)
+public struct LiveCameraCellAppearance {
+    public var backgroundColor: UIColor
+    public var cameraImageProvider: () -> UIImage?
+    public var cameraLockImageProvider: () -> UIImage?
+
+    public init(backgroundColor: UIColor,
+                cameraImage: @autoclosure @escaping () -> UIImage?,
+                cameraLockImage: @autoclosure @escaping () -> UIImage?) {
+        self.backgroundColor = backgroundColor
+        self.cameraImageProvider = cameraImage
+        self.cameraLockImageProvider = cameraLockImage
+    }
+
+    public static func createDefaultAppearance() -> LiveCameraCellAppearance {
+        return LiveCameraCellAppearance(
+            backgroundColor: UIColor(red: 24.0/255.0, green: 101.0/255.0, blue: 245.0/255.0, alpha: 1),
+            cameraImage: UIImage(named: "camera", in: Bundle(for: LiveCameraCell.self), compatibleWith: nil),
+            cameraLockImage: UIImage(named: "camera_lock", in: Bundle(for: LiveCameraCell.self), compatibleWith: nil)
+        )
+    }
 }
 
 class LiveCameraCell: UICollectionViewCell {
 
-    private struct Constants {
-        static let backgroundColor = UIColor(red: 71.0/255.0, green: 160.0/255.0, blue: 219.0/255.0, alpha: 1)
-        static let cameraImageName = "camera"
-        static let lockedCameraImageName = "camera_lock"
-    }
-
     private var iconImageView: UIImageView!
+
+    var appearance: LiveCameraCellAppearance = LiveCameraCellAppearance.createDefaultAppearance() {
+        didSet {
+            self.contentView.backgroundColor = self.appearance.backgroundColor
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -57,7 +70,7 @@ class LiveCameraCell: UICollectionViewCell {
 
     private func commonInit() {
         self.configureIcon()
-        self.contentView.backgroundColor = Constants.backgroundColor
+        self.contentView.backgroundColor = self.appearance.backgroundColor
     }
 
     var captureLayer: CALayer? {
@@ -68,14 +81,14 @@ class LiveCameraCell: UICollectionViewCell {
                     self.contentView.layer.insertSublayer(captureLayer, below: self.iconImageView.layer)
                     let animation = CABasicAnimation.bma_fadeInAnimationWithDuration(0.25)
                     let animationKey = "fadeIn"
-                    captureLayer.removeAnimationForKey(animationKey)
-                    captureLayer.addAnimation(animation, forKey: animationKey)
+                    captureLayer.removeAnimation(forKey: animationKey)
+                    captureLayer.add(animation, forKey: animationKey)
                 }
             }
         }
     }
 
-    typealias CellCallback = (cell: LiveCameraCell) -> Void
+    typealias CellCallback = (_ cell: LiveCameraCell) -> Void
 
     var onWillBeAddedToWindow: CellCallback?
     override func willMoveToWindow(newWindow: UIWindow?) {
@@ -86,30 +99,32 @@ class LiveCameraCell: UICollectionViewCell {
 
     var onWasRemovedFromWindow: CellCallback?
     override func didMoveToWindow() {
-        if self.window == nil {
-            self.onWasRemovedFromWindow?(cell: self)
+        if let _ = self.window {
+            self.onWasAddedToWindow?(self)
+        } else {
+            self.onWasRemovedFromWindow?(self)
         }
     }
 
-    func updateWithAuthorizationStatus(status: AVAuthorizationStatus) {
+    func updateWithAuthorizationStatus(_ status: AVAuthorizationStatus) {
         self.authorizationStatus = status
         self.updateIcon()
     }
 
-    private var authorizationStatus: AVAuthorizationStatus = .NotDetermined
+    private var authorizationStatus: AVAuthorizationStatus = .notDetermined
 
     private func configureIcon() {
         self.iconImageView = UIImageView()
-        self.iconImageView.contentMode = .Center
+        self.iconImageView.contentMode = .center
         self.contentView.addSubview(self.iconImageView)
     }
 
     private func updateIcon() {
         switch self.authorizationStatus {
-        case .NotDetermined, .Authorized:
-            self.iconImageView.image = UIImage(named: Constants.cameraImageName, inBundle: NSBundle(forClass: LiveCameraCell.self), compatibleWithTraitCollection: nil)
-        case .Restricted, .Denied:
-            self.iconImageView.image = UIImage(named: Constants.lockedCameraImageName, inBundle: NSBundle(forClass: LiveCameraCell.self), compatibleWithTraitCollection: nil)
+        case .notDetermined, .authorized:
+            self.iconImageView.image = self.appearance.cameraImageProvider()
+        case .restricted, .denied:
+            self.iconImageView.image = self.appearance.cameraLockImageProvider()
         }
         self.setNeedsLayout()
     }

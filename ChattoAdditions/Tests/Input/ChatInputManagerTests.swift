@@ -52,8 +52,8 @@ class ChatInputManagerTests: XCTestCase {
 
     func testThat_GivenItemHasNonePresentationMode_WhenItemReceivesFocus_ItDoesntBecomeFocused() {
         let item = MockInputItem()
-        item.presentationMode = .None
-        self.presenter.inputBar(self.bar, didReceiveFocusOnItem: item)
+        item.presentationMode = .none
+        self.presenter.onDidReceiveFocusOnItem(item)
         XCTAssertNil(self.presenter.focusedItem)
     }
 
@@ -89,24 +89,24 @@ class ChatInputManagerTests: XCTestCase {
     func testThat_GivenItemHasKeyboardPresentationMode_WhenItemReceivesFocus_PresenterShowsTextView() {
         self.bar.showsTextView = false
         let item = MockInputItem()
-        item.presentationMode = .Keyboard
-        self.presenter.inputBar(self.bar, didReceiveFocusOnItem: item)
+        item.presentationMode = .keyboard
+        self.presenter.onDidReceiveFocusOnItem(item)
         XCTAssertTrue(self.bar.showsTextView)
     }
 
     func testThat_GivenItemHasCustomViewPresentationMode_WhenItemReceivesFocus_PresenterHidesTextView() {
         self.bar.showsTextView = true
         let item = MockInputItem()
-        item.presentationMode = .CustomView
-        self.presenter.inputBar(self.bar, didReceiveFocusOnItem: item)
+        item.presentationMode = .customView
+        self.presenter.onDidReceiveFocusOnItem(item)
         XCTAssertFalse(self.bar.showsTextView)
     }
 
     func testThat_GivenItemHasNonePresentationMode_WhenItemReceivesFocus_PresenterDoesntHideTextView() {
         self.bar.showsTextView = true
         let item = MockInputItem()
-        item.presentationMode = .None
-        self.presenter.inputBar(self.bar, didReceiveFocusOnItem: item)
+        item.presentationMode = .none
+        self.presenter.onDidReceiveFocusOnItem(item)
         XCTAssertTrue(self.bar.showsTextView)
 
     }

@@ -25,20 +25,54 @@
 import Foundation
 import Photos
 
-final class LiveCameraCellPresenter {
+public final class LiveCameraCellPresenter {
+    private typealias Class = LiveCameraCellPresenter
+    public typealias AVAuthorizationStatusProvider = () -> AVAuthorizationStatus
+
+
+    private let cellAppearance: LiveCameraCellAppearance
+    private let authorizationStatusProvider: () -> AVAuthorizationStatus
+    public init(cellAppearance: LiveCameraCellAppearance = LiveCameraCellAppearance.createDefaultAppearance(), authorizationStatusProvider: @escaping AVAuthorizationStatusProvider = LiveCameraCellPresenter.createDefaultCameraAuthorizationStatusProvider()) {
+        self.cellAppearance = cellAppearance
+        self.authorizationStatusProvider = authorizationStatusProvider
+    }
 
     deinit {
         self.unsubscribeFromAppNotifications()
     }
 
+    private static let reuseIdentifier = "LiveCameraCell"
+    private static func createDefaultCameraAuthorizationStatusProvider() -> AVAuthorizationStatusProvider {
+        return {
+            return AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+        }
+    }
+
+    public static func registerCells(collectionView: UICollectionView) {
+        collectionView.register(LiveCameraCell.self, forCellWithReuseIdentifier: Class.reuseIdentifier)
+    }
+
+    public func dequeueCell(collectionView: UICollectionView, indexPath: IndexPath) -> UICollectionViewCell {
+        return collectionView.dequeueReusableCell(withReuseIdentifier: Class.reuseIdentifier, for: indexPath)
+    }
+
     private weak var cell: LiveCameraCell?
 
-    func cellWillBeShown(cell: LiveCameraCell) {
+    public func cellWillBeShown(_ cell: UICollectionViewCell) {
+        guard let cell = cell as? LiveCameraCell else {
+            assertionFailure("Invalid cell given to presenter")
+            return
+        }
         self.cell = cell
         self.configureCell()
     }
 
-    func cellWasHidden(cell: LiveCameraCell) {
+    public func cellWasHidden(_ cell: UICollectionViewCell) {
+        guard let cell = cell as? LiveCameraCell else {
+            assertionFailure("Invalid cell given to presenter")
+            return
+        }
+
         if self.cell === cell {
             cell.captureLayer = nil
             self.cell = nil
@@ -49,7 +83,9 @@ final class LiveCameraCellPresenter {
     private func configureCell() {
         guard let cameraCell = self.cell else { return }
 
+        self.cameraAuthorizationStatus = self.authorizationStatusProvider()
         cameraCell.updateWithAuthorizationStatus(self.cameraAuthorizationStatus)
+        cameraCell.appearance = self.cellAppearance
 
         self.startCapturing()
 
@@ -59,25 +95,27 @@ final class LiveCameraCellPresenter {
             cameraCell.captureLayer = nil
         }
 
-        cameraCell.onWillBeAddedToWindow = { [weak self] (cell) in
-            if self?.cell === cell {
-                self?.configureCell()
+        cameraCell.onWasAddedToWindow = { [weak self] (cell) in
+            guard let sSelf = self, sSelf.cell === cell else { return }
+            if !sSelf.cameraPickerIsVisible {
+                sSelf.startCapturing()
             }
         }
 
         cameraCell.onWasRemovedFromWindow = { [weak self] (cell) in
-            if self?.cell === cell {
-                self?.stopCapturing()
+            guard let sSelf = self, sSelf.cell === cell else { return }
+            if !sSelf.cameraPickerIsVisible {
+                sSelf.stopCapturing()
             }
         }
     }
 
     // MARK: - App Notifications
-    lazy var notificationCenter = NSNotificationCenter.defaultCenter()
+    lazy var notificationCenter = NotificationCenter.default
 
     private func subscribeToAppNotifications() {
-        self.notificationCenter.addObserver(self, selector: #selector(LiveCameraCellPresenter.handleWillResignActiveNotification), name: UIApplicationWillResignActiveNotification, object: nil)
-        self.notificationCenter.addObserver(self, selector: #selector(LiveCameraCellPresenter.handleDidBecomeActiveNotification), name: UIApplicationDidBecomeActiveNotification, object: nil)
+        self.notificationCenter.addObserver(self, selector: #selector(LiveCameraCellPresenter.handleWillResignActiveNotification), name: NSNotification.Name.UIApplicationWillResignActive, object: nil)
+        self.notificationCenter.addObserver(self, selector: #selector(LiveCameraCellPresenter.handleDidBecomeActiveNotification), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
     }
 
     private func unsubscribeFromAppNotifications() {
@@ -88,7 +126,7 @@ final class LiveCameraCellPresenter {
 
     @objc
     private func handleWillResignActiveNotification() {
-        if self.captureSession.isCapturing ?? false {
+        if self.captureSession.isCapturing {
             self.needsRestoreCaptureSession = true
             self.stopCapturing()
         }
@@ -120,16 +158,16 @@ final class LiveCameraCellPresenter {
 
     private var isCaptureAvailable: Bool {
         switch self.cameraAuthorizationStatus {
-        case .NotDetermined, .Restricted, .Denied:
+        case .notDetermined, .restricted, .denied:
             return false
-        case .Authorized:
+        case .authorized:
             return true
         }
     }
 
     lazy var captureSession: LiveCameraCaptureSessionProtocol = LiveCameraCaptureSession()
 
-    var cameraAuthorizationStatus: AVAuthorizationStatus = .NotDetermined {
+    private var cameraAuthorizationStatus: AVAuthorizationStatus = .notDetermined {
         didSet {
             if self.isCaptureAvailable {
                 self.subscribeToAppNotifications()

@@ -26,7 +26,7 @@ import UIKit
 
 class ConversationsViewController: UITableViewController {
 
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 
         var initialCount = 0
         let pageSize = 50
@@ -39,12 +39,23 @@ class ConversationsViewController: UITableViewController {
         } else if segue.identifier == "10000 messages" {
             initialCount = 10000
         } else if segue.identifier == "overview" {
-            dataSource = FakeDataSource(messages: TutorialMessageFactory.createMessages().map { $0 }, pageSize: pageSize)
+            dataSource = FakeDataSource(messages: TutorialMessageFactory.createMessages(), pageSize: pageSize)
         } else {
             assert(false, "segue not handled!")
         }
 
-        let chatController = segue.destinationViewController as! DemoChatViewController
+
+        let chatController = { () -> DemoChatViewController? in
+            if let controller = segue.destination as? DemoChatViewController {
+                return controller
+            }
+            if let tabController = segue.destination as? UITabBarController,
+                let controller = tabController.viewControllers?.first as? DemoChatViewController {
+                return controller
+            }
+            return nil
+        }()!
+
         if dataSource == nil {
             dataSource = FakeDataSource(count: initialCount, pageSize: pageSize)
         }

@@ -36,8 +36,8 @@ class BaseMessagePresenterTests: XCTestCase {
         let viewModelBuilder = PhotoMessageViewModelDefaultBuilder()
         let sizingCell = PhotoMessageCollectionViewCell.sizingCell()
         let photoStyle = PhotoMessageCollectionViewCellDefaultStyle()
-        let baseStyle = BaseMessageCollectionViewCellDefaultSyle()
-        let messageModel = MessageModel(uid: "uid", senderId: "senderId", type: "photo-message", isIncoming: true, date: NSDate(), status: .Success)
+        let baseStyle = BaseMessageCollectionViewCellDefaultStyle()
+        let messageModel = MessageModel(uid: "uid", senderId: "senderId", type: "photo-message", isIncoming: true, date: Date(), status: .success)
         let photoMessageModel = PhotoMessageModel(messageModel: messageModel, imageSize: CGSize(width: 30, height: 30), image: UIImage())
         self.interactionHandler = PhotoMessageTestHandler()
         self.presenter = PhotoMessagePresenter(messageModel: photoMessageModel, viewModelBuilder: viewModelBuilder, interactionHandler: self.interactionHandler, sizingCell: sizingCell, baseCellStyle: baseStyle, photoCellStyle: photoStyle)
@@ -60,7 +60,14 @@ class BaseMessagePresenterTests: XCTestCase {
     func testThat_WhenCellIsLongPressedOnBubble_ThenInteractionHandlerHandlesEvent() {
         let cell = PhotoMessageCollectionViewCell(frame: CGRect.zero)
         self.presenter.configureCell(cell, decorationAttributes: self.decorationAttributes)
-        cell.bubbleLongPressed()
-        XCTAssertTrue(self.interactionHandler.didHandleLongPressOnBubble)
+        cell.onBubbleLongPressBegan?(cell)
+        XCTAssertTrue(self.interactionHandler.didHandleBeginLongPressOnBubble)
+    }
+
+    func testThat_WhenCellIsEndLongPressOnBubble_ThenInteractionHandlerHandlesEvent() {
+        let cell = PhotoMessageCollectionViewCell(frame: CGRect.zero)
+        self.presenter.configureCell(cell, decorationAttributes: self.decorationAttributes)
+        cell.onBubbleLongPressEnded?(cell)
+        XCTAssertTrue(self.interactionHandler.didHandleEndLongPressOnBubble)
     }
 }

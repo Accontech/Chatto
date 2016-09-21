@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		282215311D1B21DC000A6AA4 /* BaseChatViewControllerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 282215301D1B21DC000A6AA4 /* BaseChatViewControllerView.swift */; };
+		B3B1B0FF1D6B40DF00D1183D /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B1B0FE1D6B40DF00D1183D /* Utils.swift */; };
 		C31E919A1BFF4CA300339585 /* ChatViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31E91991BFF4CA300339585 /* ChatViewControllerTests.swift */; };
 		C321C3961BE78835009803D1 /* CollectionChangesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C321C3951BE78835009803D1 /* CollectionChangesTests.swift */; };
 		C321DDA91BE9649F00DE88CC /* BaseChatItemPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C321DD941BE9649F00DE88CC /* BaseChatItemPresenter.swift */; };
@@ -161,6 +162,7 @@
 				C3E905031BE0521700C662A2 /* Chatto.h */,
 				C3E905041BE0521700C662A2 /* Info.plist */,
 				C36281EC1BF10086004D6BCE /* SerialTaskQueue.swift */,
+				B3B1B0FE1D6B40DF00D1183D /* Utils.swift */,
 				C321DD931BE9649F00DE88CC /* Chat Items */,
 				C3E904AE1BE0509E00C662A2 /* ChatController */,
 			);
@@ -242,7 +244,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0710;
-				LastUpgradeCheck = 0710;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = Badoo;
 				TargetAttributes = {
 					C32BB71F1BE0504D0069EC50 = {
@@ -321,8 +323,10 @@
 				C36281E51BF0F0F0004D6BCE /* ChatViewController+Changes.swift in Sources */,
 				C36281E71BF0F196004D6BCE /* ChatViewController+Scrolling.swift in Sources */,
 				C36281EB1BF0F62F004D6BCE /* DummyChatItemPresenter.swift in Sources */,
-				C38621DF1BE6C89900421718 /* CollectionChanges.swift in Sources */,
-				C3E904D91BE0509E00C662A2 /* ChatCollectionViewLayout.swift in Sources */,
+				C3C7C3981CAC4BAC00A49929 /* ChatCollectionViewLayout.swift in Sources */,
+				C3C7C39B1CAC4BAC00A49929 /* KeyboardTracker.swift in Sources */,
+				B3B1B0FF1D6B40DF00D1183D /* Utils.swift in Sources */,
+				C342D0C11C638A2C008A4605 /* ReadOnlyOrderedDictionary.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,8 +367,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -411,8 +417,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -453,6 +461,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.badoo.Chatto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -470,6 +479,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.badoo.Chatto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -480,6 +490,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.badoo.ChattoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -490,6 +501,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.badoo.ChattoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

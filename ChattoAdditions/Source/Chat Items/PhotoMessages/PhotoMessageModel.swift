@@ -29,9 +29,12 @@ public protocol PhotoMessageModelProtocol: DecoratedMessageModelProtocol {
     var imageSize: CGSize { get }
 }
 
-public class PhotoMessageModel: PhotoMessageModelProtocol {
-    public let messageModel: MessageModelProtocol
-    public let image: UIImage? // fixme: URL
+open class PhotoMessageModel<MessageModelT: MessageModelProtocol>: PhotoMessageModelProtocol {
+    public var messageModel: MessageModelProtocol {
+        return self._messageModel
+    }
+    public let _messageModel: MessageModelT // Can't make messasgeModel: MessageModelT: https://gist.github.com/diegosanchezr/5a66c7af862e1117b556
+    public let image: UIImage
     public let imageSize: CGSize
     public init(messageModel: MessageModelProtocol, imageSize: CGSize, image: UIImage) {
         self.messageModel = messageModel
