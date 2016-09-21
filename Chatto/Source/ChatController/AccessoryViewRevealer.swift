@@ -30,50 +30,50 @@ public protocol AccessoryViewRevealable {
 
 class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 
-    private let panRecognizer: UIPanGestureRecognizer = UIPanGestureRecognizer()
-    private let collectionView: UICollectionView
+    fileprivate let panRecognizer: UIPanGestureRecognizer = UIPanGestureRecognizer()
+    fileprivate let collectionView: UICollectionView
 
     init(collectionView: UICollectionView) {
         self.collectionView = collectionView
         super.init()
         self.collectionView.addGestureRecognizer(self.panRecognizer)
-        self.panRecognizer.addTarget(self, action: "handlePan:")
+        self.panRecognizer.addTarget(self, action: #selector(AccessoryViewRevealer.handlePan(_:)))
         self.panRecognizer.delegate = self
     }
 
     @objc
-    private func handlePan(panRecognizer: UIPanGestureRecognizer) {
+    fileprivate func handlePan(_ panRecognizer: UIPanGestureRecognizer) {
         switch panRecognizer.state {
-        case .Began:
+        case .began:
             break
-        case .Changed:
-            let translation = panRecognizer.translationInView(self.collectionView)
+        case .changed:
+            let translation = panRecognizer.translation(in: self.collectionView)
             self.revealAccessoryView(atOffset: -translation.x)
-        case .Ended, .Cancelled, .Failed:
+        case .ended, .cancelled, .failed:
             self.revealAccessoryView(atOffset: 0)
         default:
             break
         }
     }
 
-    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
 
-    func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer != self.panRecognizer {
             return true
         }
 
-        let translation = self.panRecognizer.translationInView(self.collectionView)
-        let x = CGFloat.abs(translation.x), y = CGFloat.abs(translation.y)
+        let translation = self.panRecognizer.translation(in: self.collectionView)
+        let x = abs(translation.x), y = abs(translation.y)
         let angleRads = atan2(y, x)
         let threshold: CGFloat = 0.0872665 // ~5 degrees
         return angleRads < threshold
     }
 
-    private func revealAccessoryView(atOffset offset: CGFloat) {
-        for cell in self.collectionView.visibleCells() {
+    fileprivate func revealAccessoryView(atOffset offset: CGFloat) {
+        for cell in self.collectionView.visibleCells {
             if let cell = cell as? AccessoryViewRevealable {
                 cell.revealAccessoryView(maximumOffset: offset, animated: offset == 0)
             }

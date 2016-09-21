@@ -26,11 +26,11 @@ import Foundation
 
 extension ChatViewController: ChatCollectionViewLayoutDelegate {
 
-    public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.decoratedChatItems.count
     }
 
-    public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let presenter = self.presenterForIndexPath(indexPath)
         let cell = presenter.dequeueCell(collectionView: collectionView, indexPath: indexPath)
         let decorationAttributes = self.decorationAttributesForIndexPath(indexPath)
@@ -38,46 +38,46 @@ extension ChatViewController: ChatCollectionViewLayoutDelegate {
         return cell
     }
 
-    public func collectionView(collectionView: UICollectionView, didEndDisplayingCell cell: UICollectionViewCell, forItemAtIndexPath indexPath: NSIndexPath) {
+    public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         // Carefull: this index path can refer to old data source after an update. Don't use it to grab items from the model
         // Instead let's use a mapping presenter <--> cell
-        if let oldPresenterForCell = self.presentersByCell.objectForKey(cell) as? ChatItemPresenterProtocol {
-            self.presentersByCell.removeObjectForKey(cell)
+        if let oldPresenterForCell = self.presentersByCell.object(forKey: cell) as? ChatItemPresenterProtocol {
+            self.presentersByCell.removeObject(forKey: cell)
             oldPresenterForCell.cellWasHidden(cell)
         }
     }
 
-    public func collectionView(collectionView: UICollectionView, willDisplayCell cell: UICollectionViewCell, forItemAtIndexPath indexPath: NSIndexPath) {
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         // Here indexPath should always referer to updated data source.
         let presenter = self.presenterForIndexPath(indexPath)
         self.presentersByCell.setObject(presenter, forKey: cell)
         presenter.cellWillBeShown(cell)
     }
 
-    public func collectionView(collectionView: UICollectionView, shouldShowMenuForItemAtIndexPath indexPath: NSIndexPath) -> Bool {
+    public func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
         return self.presenterForIndexPath(indexPath).shouldShowMenu() ?? false
     }
 
-    public func collectionView(collectionView: UICollectionView, canPerformAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) -> Bool {
+    public func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
         return self.presenterForIndexPath(indexPath).canPerformMenuControllerAction(action) ?? false
     }
 
-    public func collectionView(collectionView: UICollectionView, performAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) {
+    public func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
         self.presenterForIndexPath(indexPath).performMenuControllerAction(action)
     }
 
-    public func presenterForIndexPath(indexPath: NSIndexPath) -> ChatItemPresenterProtocol {
-        return self.presenterForIndex(indexPath.item, decoratedChatItems: self.decoratedChatItems)
+    public func presenterForIndexPath(_ indexPath: IndexPath) -> ChatItemPresenterProtocol {
+        return self.presenterForIndex((indexPath as NSIndexPath).item, decoratedChatItems: self.decoratedChatItems)
     }
 
-    public func presenterForIndex(index: Int, decoratedChatItems: [DecoratedChatItem]) -> ChatItemPresenterProtocol {
+    public func presenterForIndex(_ index: Int, decoratedChatItems: [DecoratedChatItem]) -> ChatItemPresenterProtocol {
         guard index < decoratedChatItems.count else {
             // This can happen from didEndDisplayingCell if we reloaded with less messages
             return DummyChatItemPresenter()
         }
 
         let chatItem = decoratedChatItems[index].chatItem
-        if let presenter = self.presentersByChatItem.objectForKey(chatItem) as? ChatItemPresenterProtocol {
+        if let presenter = self.presentersByChatItem.object(forKey: chatItem) as? ChatItemPresenterProtocol {
             return presenter
         }
         let presenter = self.createPresenterForChatItem(chatItem)
@@ -85,7 +85,7 @@ extension ChatViewController: ChatCollectionViewLayoutDelegate {
         return presenter
     }
 
-    public func createPresenterForChatItem(chatItem: ChatItemProtocol) -> ChatItemPresenterProtocol {
+    public func createPresenterForChatItem(_ chatItem: ChatItemProtocol) -> ChatItemPresenterProtocol {
         for builder in self.presenterBuildersByType[chatItem.type] ?? [] {
             if builder.canHandleChatItem(chatItem) {
                 return builder.createPresenterWithChatItem(chatItem)
@@ -94,7 +94,7 @@ extension ChatViewController: ChatCollectionViewLayoutDelegate {
         return DummyChatItemPresenter()
     }
 
-    public func decorationAttributesForIndexPath(indexPath: NSIndexPath) -> ChatItemDecorationAttributesProtocol? {
-        return self.decoratedChatItems[indexPath.item].decorationAttributes
+    public func decorationAttributesForIndexPath(_ indexPath: IndexPath) -> ChatItemDecorationAttributesProtocol? {
+        return self.decoratedChatItems[(indexPath as NSIndexPath).item].decorationAttributes
     }
 }
