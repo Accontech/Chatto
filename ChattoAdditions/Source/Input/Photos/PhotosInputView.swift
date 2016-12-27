@@ -223,12 +223,41 @@ extension PhotosInputView: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if self.photoLibraryAuthorizationStatus != .authorized {
+            return 1
+        }
         return self.dataProvider.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         var cell: PhotosInputCell
 
+        if self.photoLibraryAuthorizationStatus != .authorized {
+             self.collectionView!.register(PhotosInputCell.self, forCellWithReuseIdentifier:"PhotosPlaceholderCellProvider")
+            cell = self.cellProvider.cellForItemAtIndexPath(indexPath) as! PhotosInputCell
+            
+            var photoAccess = "Ring does not have access to your photos"
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.maximumLineHeight = 15
+            let fontAttributes = [ NSFontAttributeName: UIFont(name: "Avenir-Medium", size: 16.0)!, NSParagraphStyleAttributeName: paragraphStyle ]
+            let photoAccessAttr = NSMutableAttributedString(string: photoAccess, attributes: fontAttributes)
+            
+            
+            var photoAccess1 = "\n\nTo enable access go to device Settings > Privacy > Photos > Ring > set to 'On'"
+            let attributes = [ NSForegroundColorAttributeName: UIColor.gray,  NSFontAttributeName: UIFont(name: "Avenir-Medium", size: 12.0)!]
+            let photoAccessAttr1 = NSMutableAttributedString(string: photoAccess1, attributes: attributes)
+            photoAccessAttr.append(photoAccessAttr1)
+            
+            var labelAccessPhoto = UILabel(frame: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
+            labelAccessPhoto.attributedText = photoAccessAttr
+            labelAccessPhoto.textAlignment = .center
+            labelAccessPhoto.numberOfLines = 0
+            cell.contentView.addSubview(labelAccessPhoto)
+            
+            cell.selectForSend = false
+            return cell
+        }
+        
         cell = self.cellProvider.cellForItemAtIndexPath(indexPath) as! PhotosInputCell
 
         var found: Bool = false
@@ -306,6 +335,9 @@ extension PhotosInputView: UICollectionViewDelegateFlowLayout {
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if self.photoLibraryAuthorizationStatus != .authorized {
+            return CGSize(width: self.frame.size.width - self.collectionViewLayout.headerReferenceSize.width, height: collectionView.bounds.height)
+        }
         return self.itemSizeCalculator.itemSizeForWidth(collectionView.bounds.height, atIndex: indexPath.item)
     }
 
