@@ -212,6 +212,17 @@ open class ChatInputBar: ReusableXibView, ChatInputPhotoCellProtocol {
 
     @IBAction func closeButtonTapped(_ sender: Any) {
         self.showsShelf = !self.showsShelf
+        
+        var showShelfButton = sender as! UIButton
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: { () -> Void in
+            
+            if showShelfButton.transform == CGAffineTransform.identity {
+                showShelfButton.transform = CGAffineTransform(rotationAngle: CGFloat(-M_PI_2/2))
+            } else {
+                showShelfButton.transform = CGAffineTransform.identity
+            }
+        }, completion: nil)
     }
     
     public func setTextViewPlaceholderAccessibilityIdentifer(_ accessibilityIdentifer: String) {
