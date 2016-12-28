@@ -74,6 +74,7 @@ class LiveCameraHeader: UICollectionReusableView {
     private var takePhoto: UIButton!
     private var changeCamera: UIButton!
     private var blueBGView: UIView!
+    private var accessLabel: UILabel!
 
     var appearance: LiveCameraHeaderAppearance = LiveCameraHeaderAppearance.createDefaultAppearance() {
         didSet {
@@ -144,6 +145,25 @@ class LiveCameraHeader: UICollectionReusableView {
         self.changeCamera = UIButton(type: .custom)
         self.changeCamera.addTarget(self, action: #selector(LiveCameraHeader.changeCameraAction), for: .touchUpInside)
         self.blueBGView.addSubview(self.changeCamera)
+        
+        self.accessLabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.frame.size.width, height: self.frame.size.height))
+        var photoAccess = "Ring does not have access to your camera"
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.maximumLineHeight = 15
+        let fontAttribute = [ NSFontAttributeName: UIFont(name: "Avenir-Medium", size: 16.0)!, NSParagraphStyleAttributeName: paragraphStyle ]
+        let photoAccessAttr = NSMutableAttributedString(string: photoAccess, attributes: fontAttribute)
+        
+        var photoAccess1 = "\n\nTo enable access go to device Settings > Privacy > Camera > Ring > set to 'On'"
+        let attributes = [ NSForegroundColorAttributeName: UIColor.gray,  NSFontAttributeName: UIFont(name: "Avenir-Medium", size: 12.0)!]
+        let photoAccessAttr1 = NSMutableAttributedString(string: photoAccess1, attributes: attributes)
+        photoAccessAttr.append(photoAccessAttr1)
+        
+        self.accessLabel.attributedText = photoAccessAttr
+        self.accessLabel.textAlignment = .center
+        self.accessLabel.numberOfLines = 0
+        
+        
+        self.blueBGView.addSubview(self.accessLabel)
     }
 
     private func updateIcon() {
@@ -157,9 +177,11 @@ class LiveCameraHeader: UICollectionReusableView {
             self.changeCamera.setImage(self.appearance.cameraSwitchSelectedImageProvider(), for: .selected)
             self.changeCamera.setImage(self.appearance.cameraSwitchSelectedImageProvider(), for: .highlighted)
             self.changeCamera.isHidden = false
+            self.accessLabel.isHidden = true
         case .restricted, .denied:
             self.takePhoto.setImage(self.appearance.cameraLockImageProvider(), for: .disabled)
             self.changeCamera.isHidden = true
+            self.accessLabel.isHidden = false
         }
         self.setNeedsLayout()
     }
