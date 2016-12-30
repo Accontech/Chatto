@@ -152,6 +152,7 @@ open class ChatInputBar: ReusableXibView, ChatInputPhotoCellProtocol {
             self.updateIntrinsicContentSizeAnimated()
         }
     }
+    public var canBeUpdated:Bool = true
 
     public var maxCharactersCount: UInt? // nil -> unlimited
 
@@ -201,8 +202,14 @@ open class ChatInputBar: ReusableXibView, ChatInputPhotoCellProtocol {
         }
     }
 
+    public func textViewIsEmpty() -> Bool {
+        return self.textView.text.isEmpty
+    }
+    
     fileprivate func updateSendButton() {
-        self.sendButton.isEnabled = self.shouldEnableSendButton(self)
+        if canBeUpdated {
+            self.sendButton.isEnabled = self.shouldEnableSendButton(self)
+        }
     }
 
     @IBAction func buttonTapped(_ sender: AnyObject) {
