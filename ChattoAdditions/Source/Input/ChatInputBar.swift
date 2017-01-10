@@ -98,6 +98,8 @@ open class ChatInputBar: ReusableXibView, ChatInputPhotoCellProtocol {
         self.textView.layer.borderColor = UIColor.lightGray.cgColor
         self.scrollView.scrollsToTop = false
         self.sendButton.isEnabled = false
+        self.showsShelf = false
+        self.closeButton.transform = CGAffineTransform(rotationAngle: CGFloat(-M_PI_2/2))
         
         self.scrollViewPhotos.layer.cornerRadius = 5
         self.scrollViewPhotos.layer.borderColor = UIColor.lightGray.cgColor
