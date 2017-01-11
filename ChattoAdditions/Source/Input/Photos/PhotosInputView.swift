@@ -298,8 +298,10 @@ extension PhotosInputView: UICollectionViewDataSource {
             return footerView
             
         default:
-            
             assert(false, "Unexpected element kind")
+            // For avoiding release build problem
+            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Footer", for: indexPath)
+            return footerView
         }
     }
 }
