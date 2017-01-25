@@ -38,7 +38,7 @@ protocol EmojisInputViewProtocol {
 }
 
 protocol EmojisInputViewDelegate: class {
-    func inputView(_ inputView: EmojisInputViewProtocol, didSelectImage image: URL?)
+    func inputView(_ inputView: EmojisInputViewProtocol, didSelectEmoji emoji: String?)
 }
 
 class EmojisInputView: UIView, EmojisInputViewProtocol {
@@ -153,9 +153,10 @@ extension EmojisInputView: UICollectionViewDataSource {
 
 extension EmojisInputView: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        self.dataProvider.requestFileURLAtIndex(indexPath.item - 1) { image in
-            self.delegate?.inputView(self, didSelectImage: image)
-        }
+        print(#function)
+        //self.dataProvider.requestFileURLAtIndex(indexPath.item - 1) { image in
+            self.delegate?.inputView(self, didSelectEmoji: "💖")
+        //}
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
