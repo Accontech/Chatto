@@ -31,6 +31,7 @@ open class EmojisChatInputItem: ChatInputItemProtocol {
     public var imageInputHandler: ((Data) -> Void)?
     
     public var emojiSelectionHandler: ((String) -> Void)?
+    public var backspaceHandler: (() -> Void)?
     
     public var cameraPermissionHandler: (() -> Void)?
 
@@ -121,5 +122,11 @@ extension EmojisChatInputItem: EmojisInputViewDelegate {
         if let emoji = emoji {
             self.emojiSelectionHandler?(emoji)
         }
+    }
+    
+    func inputView(_ inputView: EmojisInputViewProtocol, didPressBackspace: Bool) {
+        print(#function)
+        
+        self.backspaceHandler?()
     }
 }
