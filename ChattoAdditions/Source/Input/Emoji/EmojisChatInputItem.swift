@@ -27,9 +27,14 @@ import Foundation
 open class EmojisChatInputItem: ChatInputItemProtocol {
     typealias Class = EmojisChatInputItem
 
-    public var emojiInputHandler: ((URL?) -> Void)?
+    public var textInputHandler: ((String) -> Void)?
+    public var imageInputHandler: ((Data) -> Void)?
+    
+    public var emojiSelectionHandler: ((String) -> Void)?
+    public var backspaceHandler: (() -> Void)?
+    
     public var cameraPermissionHandler: (() -> Void)?
-    public var emojisPermissionHandler: (() -> Void)?
+
     public weak var presentingController: UIViewController?
 
     let buttonAppearance: TabInputButtonAppearance
@@ -57,7 +62,7 @@ open class EmojisChatInputItem: ChatInputItemProtocol {
 
     lazy private var internalTabView: UIButton = {
         let button: UIButton = TabInputButton.makeInputButton(withAppearance: self.buttonAppearance, accessibilityID: "emojis.chat.input.view")
-        button.isEnabled = false
+        //button.isEnabled = false
         return button
     }()
 
@@ -76,11 +81,11 @@ open class EmojisChatInputItem: ChatInputItemProtocol {
     // MARK: - ChatInputItemProtocol
 
     open var presentationMode: ChatInputItemPresentationMode {
-        return .none
+        return .customView
     }
 
     open var showsSendButton: Bool {
-        return false
+        return true
     }
 
     open var inputView: UIView? {
@@ -91,22 +96,37 @@ open class EmojisChatInputItem: ChatInputItemProtocol {
         return self.internalTabView
     }
 
-    open func handleInput(_ input: AnyObject) {
-        if let image = input as? URL {
-            self.emojiInputHandler?(image)
+    
+    public func handleInput(_ input: AnyObject) {
+        print(#function)
+
+        if let text = input as? String {
+            self.textInputHandler?(text)
         }
     }
     
-    open func handleImageInput(_ input: AnyObject) {
-        if let image = input as? URL {
-            self.emojiInputHandler?(image)
+    public func handleImageInput(_ input: AnyObject) {
+        print(#function)
+
+        if let image = input as? Data {
+            self.imageInputHandler?(image)
         }
     }
 }
 
 // MARK: - EmojisInputViewDelegate
 extension EmojisChatInputItem: EmojisInputViewDelegate {
-    func inputView(_ inputView: EmojisInputViewProtocol, didSelectImage image: URL?) {
-        self.emojiInputHandler?(image)
+    func inputView(_ inputView: EmojisInputViewProtocol, didSelectEmoji emoji: String?) {
+        print(#function)
+        
+        if let emoji = emoji {
+            self.emojiSelectionHandler?(emoji)
+        }
+    }
+    
+    func inputView(_ inputView: EmojisInputViewProtocol, didPressBackspace: Bool) {
+        print(#function)
+        
+        self.backspaceHandler?()
     }
 }

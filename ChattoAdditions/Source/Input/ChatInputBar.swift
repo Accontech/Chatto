@@ -53,7 +53,7 @@ open class ChatInputBar: ReusableXibView, ChatInputPhotoCellProtocol {
     }
 
     @IBOutlet weak var scrollView: HorizontalStackScrollView!
-    @IBOutlet weak var textView: ExpandableTextView!
+    @IBOutlet public weak var textView: ExpandableTextView!
     @IBOutlet public weak var sendButton: UIButton!
     @IBOutlet weak var closeButton: UIButton!
     @IBOutlet weak var scrollViewPhotos: UIScrollView!
@@ -356,7 +356,7 @@ extension ChatInputBar: ChatInputItemViewDelegate {
     public func focusOnInputItem(_ inputItem: ChatInputItemProtocol) {
         let shouldFocus = self.delegate?.inputBar(self, shouldFocusOnItem: inputItem) ?? true
         guard shouldFocus else { return }
-
+        
         self.presenter?.onDidReceiveFocusOnItem(inputItem)
         self.delegate?.inputBar(self, didReceiveFocusOnItem: inputItem)
     }
