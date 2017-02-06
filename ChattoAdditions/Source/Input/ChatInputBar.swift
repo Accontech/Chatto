@@ -224,14 +224,37 @@ open class ChatInputBar: ReusableXibView, ChatInputPhotoCellProtocol {
         
         var showShelfButton = sender as! UIButton
         
-        UIView.animate(withDuration: 0.3, delay: 0, options: UIViewAnimationOptions.curveEaseIn, animations: { () -> Void in
+        var rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
+        
+        var toValue = CGFloat()
+        
+        if self.showsShelf {
             
-            if showShelfButton.transform == CGAffineTransform.identity {
-                showShelfButton.transform = CGAffineTransform(rotationAngle: CGFloat(-M_PI_2/2))
-            } else {
-                showShelfButton.transform = CGAffineTransform.identity
-            }
-        }, completion: nil)
+            toValue = CGFloat(M_PI_4)
+            
+        } else {
+            
+            toValue = -CGFloat(M_PI_4)
+            
+        }
+        
+        rotateAnimation = self.rotationAnimation(from: 0.0, to: toValue, duration: 0.3, Additive: true, RemovedOnCompletion: false, fillMode: kCAFillModeForwards)
+        
+        showShelfButton.layer.add(rotateAnimation, forKey: nil)
+    }
+    
+    private func rotationAnimation(from fromValue:CGFloat, to toValue:CGFloat, duration durationValue:CFTimeInterval, Additive isAdditive:Bool,RemovedOnCompletion isRemovedOnCompletion:Bool, fillMode mode:String)->CABasicAnimation {
+        
+        //change to CABasicAnimation because of with UIViewAnimation it can stuck on some point
+        let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
+        rotateAnimation.fromValue = fromValue
+        rotateAnimation.toValue = toValue
+        rotateAnimation.duration = durationValue
+        rotateAnimation.isAdditive = isAdditive //If YES, the value specified by the animation will be added to the current render tree value of the property to produce the new render tree value
+        rotateAnimation.isRemovedOnCompletion = isRemovedOnCompletion //This and subsequent lines are added to keep changes caused by animation
+        rotateAnimation.fillMode = mode
+        
+        return rotateAnimation
     }
     
     public func setTextViewPlaceholderAccessibilityIdentifer(_ accessibilityIdentifer: String) {
