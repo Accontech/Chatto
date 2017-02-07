@@ -138,10 +138,29 @@ class LiveCameraCaptureSession: LiveCameraCaptureSessionProtocol {
     
     func takePhoto() {
         if let videoConnection = self.stillImageOutput.connection(withMediaType: AVMediaTypeVideo) {
-            self.stillImageOutput.captureStillImageAsynchronously(from: videoConnection) {
-                (imageDataSampleBuffer, error) -> Void in
-                let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataSampleBuffer)
-                self.delegate?.liveCameraCaptureSessionPhotoToken(imageData!)
+            if videoConnection.isVideoOrientationSupported {
+                var newOrientation : AVCaptureVideoOrientation?
+                
+                switch UIDevice.current.orientation {
+                case UIDeviceOrientation.portrait:
+                    newOrientation = AVCaptureVideoOrientation.portrait
+                case UIDeviceOrientation.portraitUpsideDown:
+                    newOrientation = AVCaptureVideoOrientation.portraitUpsideDown
+                case UIDeviceOrientation.landscapeLeft:
+                    newOrientation = AVCaptureVideoOrientation.landscapeRight;
+                case UIDeviceOrientation.landscapeRight:
+                    newOrientation = AVCaptureVideoOrientation.landscapeLeft
+                default:
+                    newOrientation = AVCaptureVideoOrientation.portrait
+                }
+                
+                videoConnection.videoOrientation = newOrientation!
+                
+                self.stillImageOutput.captureStillImageAsynchronously(from: videoConnection) {
+                    (imageDataSampleBuffer, error) -> Void in
+                    let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataSampleBuffer)
+                    self.delegate?.liveCameraCaptureSessionPhotoToken(imageData! as Data)
+                }
             }
         }
     }
