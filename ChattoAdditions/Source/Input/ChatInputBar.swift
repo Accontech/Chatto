@@ -315,6 +315,7 @@ open class ChatInputBar: ReusableXibView, ChatInputPhotoCellProtocol {
         self.scrollViewPhotos.contentSize =  CGSize(width: list.count*150 + 10, height: 100)
         self.scrollViewPhotos.scrollRectToVisible(CGRect(x: self.scrollViewPhotos.contentSize.width - self.scrollViewPhotos.frame.size.width, y: 0, width: self.scrollViewPhotos.frame.size.width, height: self.scrollViewPhotos.frame.size.height), animated: true)
         self.updateSendButton()
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "enableTakePhotoButton"), object: nil)
     }
     
     func chatInputPhotoCellDidRemove(cell: ChatInputPhotoCell, item: (index: IndexPath, url: URL)) {
