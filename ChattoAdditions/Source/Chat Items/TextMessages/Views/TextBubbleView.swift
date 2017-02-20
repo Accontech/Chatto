@@ -32,10 +32,12 @@ public protocol TextBubbleViewStyleProtocol {
     func textInsets(viewModel: TextMessageViewModelProtocol, isSelected: Bool) -> UIEdgeInsets
 }
 
-public final class TextBubbleView: UIView, MaximumLayoutWidthSpecificable, BackgroundSizingQueryable {
+public final class TextBubbleView: UIView, MaximumLayoutWidthSpecificable, BackgroundSizingQueryable, UITextViewDelegate {
 
     public var preferredMaxLayoutWidth: CGFloat = 0
     public var animationDuration: CFTimeInterval = 0.33
+    static let kMessageShareLink = Notification.Name("kMessageShareLink")
+    
     public var viewContext: ViewContext = .normal {
         didSet {
             if self.viewContext == .sizing {
@@ -81,6 +83,7 @@ public final class TextBubbleView: UIView, MaximumLayoutWidthSpecificable, Backg
     private func commonInit() {
         self.addSubview(self.bubbleImageView)
         self.addSubview(self.textView)
+        self.textView.delegate = self
     }
 
     private lazy var bubbleImageView: UIImageView = {
@@ -90,7 +93,7 @@ public final class TextBubbleView: UIView, MaximumLayoutWidthSpecificable, Backg
     }()
 
     private var borderImageView: UIImageView = UIImageView()
-    private var textView: UITextView = {
+    public var textView: UITextView = {
         let textView = ChatMessageTextView()
         UIView.performWithoutAnimation({ () -> Void in // fixes iOS 8 blinking when cell appears
             textView.backgroundColor = UIColor.clear
@@ -110,6 +113,16 @@ public final class TextBubbleView: UIView, MaximumLayoutWidthSpecificable, Backg
         return textView
     }()
 
+    @available(iOS 10.0, *)
+    public func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+        
+        // True => User can click on the URL Ling (otherwise return false)
+        
+        NotificationCenter.default.post(name: TextBubbleView.kMessageShareLink, object: URL)
+        
+        return false
+    }
+    
     public private(set) var isUpdating: Bool = false
     public func performBatchUpdates(_ updateClosure: @escaping () -> Void, animated: Bool, completion: (() -> Void)?) {
         self.isUpdating = true
