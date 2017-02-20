@@ -27,9 +27,7 @@ import Foundation
 open class PhotosChatInputItem: ChatInputItemProtocol {
     typealias Class = PhotosChatInputItem
 
-    public var photoInputHandler: ((URL?) -> Void)?
-    public var photoInputHandlerData: ((Data?) -> Void)?
-    public var photoSelectionHandler: (([(index: IndexPath, url: URL)]?) -> Void)?
+    public var photoInputHandler: ((UIImage) -> Void)?
     public var cameraPermissionHandler: (() -> Void)?
     public var photosPermissionHandler: (() -> Void)?
     public weak var presentingController: UIViewController?
@@ -54,21 +52,9 @@ open class PhotosChatInputItem: ChatInputItemProtocol {
     }
 
     public static func createDefaultInputViewAppearance() -> PhotosInputViewAppearance {
-        return PhotosInputViewAppearance(liveCameraHeaderAppearance: LiveCameraHeaderAppearance.createDefaultAppearance())
+        return PhotosInputViewAppearance(liveCameraCellAppearence: LiveCameraCellAppearance.createDefaultAppearance())
     }
 
-    public func removeItemFromList(item: (index: IndexPath, url: URL)) {
-        (self.photosInputView as! PhotosInputView).removeItemFromList(item: item)
-    }
-    
-    public func getSelectedPhotoItems() -> [(index: IndexPath, url: URL)] {
-        return (self.photosInputView as! PhotosInputView).getSelectedPhotoItems()
-    }
-
-    public func addItemToList(item: (index: IndexPath, url: URL)) -> [(index: IndexPath, url: URL)] {
-        return (self.photosInputView as! PhotosInputView).addItemToList(item: item)
-    }
-    
     lazy private var internalTabView: UIButton = {
         return TabInputButton.makeInputButton(withAppearance: self.buttonAppearance, accessibilityID: "photos.chat.input.view")
     }()
@@ -104,30 +90,18 @@ open class PhotosChatInputItem: ChatInputItemProtocol {
     }
 
     open func handleInput(_ input: AnyObject) {
-        if let image = input as? URL {
+        if let image = input as? UIImage {
             self.photoInputHandler?(image)
-        }
-    }
-    
-    open func handleImageInput(_ input: AnyObject) {
-        if let image = input as? URL {
-            self.photoInputHandler?(image)
-        } else if let image = input as? Data {
-            self.photoInputHandlerData?(image)
         }
     }
 }
 
 // MARK: - PhotosInputViewDelegate
 extension PhotosChatInputItem: PhotosInputViewDelegate {
-    func inputView(_ inputView: PhotosInputViewProtocol, didSelectImage image: URL?) {
+    func inputView(_ inputView: PhotosInputViewProtocol, didSelectImage image: UIImage) {
         self.photoInputHandler?(image)
     }
 
-    func inputViewSelectImages(_ inputView: PhotosInputViewProtocol, selectImageList image: [(index: IndexPath, url: URL)]?) {
-        self.photoSelectionHandler?(image)
-    }
-    
     func inputViewDidRequestCameraPermission(_ inputView: PhotosInputViewProtocol) {
         self.cameraPermissionHandler?()
     }
