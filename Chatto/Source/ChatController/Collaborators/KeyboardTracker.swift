@@ -24,7 +24,7 @@
 
 import Foundation
 
-public class KeyboardTracker {
+class KeyboardTracker {
 
     private enum KeyboardStatus {
         case hidden
@@ -49,7 +49,7 @@ public class KeyboardTracker {
     }()
 
     var isTracking = false
-    public var inputContainer: UIView
+    var inputContainer: UIView
     private var notificationCenter: NotificationCenter
 
     typealias LayoutBlock = (_ bottomMargin: CGFloat) -> Void

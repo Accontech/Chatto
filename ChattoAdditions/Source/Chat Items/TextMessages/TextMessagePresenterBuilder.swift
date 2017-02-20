@@ -41,11 +41,11 @@ open class TextMessagePresenterBuilder<ViewModelBuilderT, InteractionHandlerT>
             self.interactionHandler = interactionHandler
     }
 
-    public let viewModelBuilder: ViewModelBuilderT
-    public let interactionHandler: InteractionHandlerT?
-    public let layoutCache = NSCache<AnyObject, AnyObject>()
+    let viewModelBuilder: ViewModelBuilderT
+    let interactionHandler: InteractionHandlerT?
+    let layoutCache = NSCache<AnyObject, AnyObject>()
 
-    public lazy var sizingCell: TextMessageCollectionViewCell = {
+    lazy var sizingCell: TextMessageCollectionViewCell = {
         var cell: TextMessageCollectionViewCell? = nil
         if Thread.isMainThread {
             cell = TextMessageCollectionViewCell.sizingCell()
