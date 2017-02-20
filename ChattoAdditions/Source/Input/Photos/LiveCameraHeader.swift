@@ -129,6 +129,7 @@ class LiveCameraHeader: UICollectionReusableView {
 
     func updateWithAuthorizationStatus(_ status: AVAuthorizationStatus) {
         self.authorizationStatus = status
+        NotificationCenter.default.addObserver(self, selector: #selector(enableTakePhotoButton), name: NSNotification.Name(rawValue: "enableTakePhotoButton"), object: nil)
         self.updateIcon()
     }
 
@@ -186,6 +187,9 @@ class LiveCameraHeader: UICollectionReusableView {
         self.setNeedsLayout()
     }
 
+    func enableTakePhotoButton(){
+        self.takePhoto.isEnabled = true
+    }
     override func layoutSubviews() {
         super.layoutSubviews()
         self.takePhoto.sizeToFit()
@@ -200,6 +204,7 @@ class LiveCameraHeader: UICollectionReusableView {
     }
     
     @objc private func takePhotoAction() {
+        self.takePhoto.isEnabled = false
         self.delegate?.liveCameraHeaderTakePhoto()
     }
 
