@@ -23,39 +23,57 @@
 */
 
 import UIKit
+import ImageIO
 
 public protocol ChatInputBarDelegate: class {
     func inputBarShouldBeginTextEditing(_ inputBar: ChatInputBar) -> Bool
     func inputBarDidBeginEditing(_ inputBar: ChatInputBar)
     func inputBarDidEndEditing(_ inputBar: ChatInputBar)
     func inputBarDidChangeText(_ inputBar: ChatInputBar)
+    func inputBarDidRemovePhoto(_ inputBar: ChatInputBar, item: (index: IndexPath, url: URL))
     func inputBarSendButtonPressed(_ inputBar: ChatInputBar)
     func inputBar(_ inputBar: ChatInputBar, shouldFocusOnItem item: ChatInputItemProtocol) -> Bool
     func inputBar(_ inputBar: ChatInputBar, didReceiveFocusOnItem item: ChatInputItemProtocol)
 }
 
 @objc
-open class ChatInputBar: ReusableXibView {
+open class ChatInputBar: ReusableXibView, ChatInputPhotoCellProtocol {
 
     public weak var delegate: ChatInputBarDelegate?
     weak var presenter: ChatInputBarPresenter?
 
     public var shouldEnableSendButton = { (inputBar: ChatInputBar) -> Bool in
+        for photoCell in inputBar.scrollViewPhotos.subviews {
+            if photoCell is ChatInputPhotoCell {
+                return true
+            }
+        }
+
         return !inputBar.textView.text.isEmpty
     }
 
     @IBOutlet weak var scrollView: HorizontalStackScrollView!
-    @IBOutlet weak var textView: ExpandableTextView!
+    @IBOutlet public weak var textView: ExpandableTextView!
     @IBOutlet public weak var sendButton: UIButton!
+    @IBOutlet weak var closeButton: UIButton!
+    @IBOutlet weak var scrollViewPhotos: UIScrollView!
+    @IBOutlet weak var tabSelectorContainer: UIView!
+    
     @IBOutlet weak var topBorderHeightConstraint: NSLayoutConstraint!
 
     @IBOutlet var constraintsForHiddenTextView: [NSLayoutConstraint]!
-    @IBOutlet var constraintsForVisibleTextView: [NSLayoutConstraint]!
+    @IBOutlet weak var constraintsTextViewTop: NSLayoutConstraint!
+    @IBOutlet weak var constraintsTextViewBottom: NSLayoutConstraint!
+    @IBOutlet weak var constraintsScrollViewViewTop: NSLayoutConstraint!
+    @IBOutlet weak var constraionTabSelectorContainerBottom: NSLayoutConstraint!
 
     @IBOutlet var constraintsForVisibleSendButton: [NSLayoutConstraint]!
     @IBOutlet var constraintsForHiddenSendButton: [NSLayoutConstraint]!
     @IBOutlet var tabBarContainerHeightConstraint: NSLayoutConstraint!
 
+    @IBOutlet weak var constraintsCloseButtonBottom: NSLayoutConstraint!
+    @IBOutlet weak var constraintsSendButtonBottom: NSLayoutConstraint!
+    
     class open func loadNib() -> ChatInputBar {
         let view = Bundle(for: self).loadNibNamed(self.nibName(), owner: nil, options: nil)!.first as! ChatInputBar
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -69,28 +87,47 @@ open class ChatInputBar: ReusableXibView {
 
     open override func awakeFromNib() {
         super.awakeFromNib()
+        
+        self.clipsToBounds = true
         self.topBorderHeightConstraint.constant = 1 / UIScreen.main.scale
         self.textView.scrollsToTop = false
         self.textView.delegate = self
+        self.textView.delegate_ = self
+        self.textView.layer.cornerRadius = 5.0
+        self.textView.layer.borderWidth = 1.0
+        self.textView.layer.borderColor = UIColor.lightGray.cgColor
         self.scrollView.scrollsToTop = false
         self.sendButton.isEnabled = false
+        self.showsShelf = false
+        self.closeButton.transform = CGAffineTransform(rotationAngle: CGFloat(-M_PI_2/2))
+        
+        self.scrollViewPhotos.layer.cornerRadius = 5
+        self.scrollViewPhotos.layer.borderColor = UIColor.lightGray.cgColor
+        self.scrollViewPhotos.layer.borderWidth = 1
     }
 
     open override func updateConstraints() {
-        if self.showsTextView {
-            NSLayoutConstraint.activate(self.constraintsForVisibleTextView)
-            NSLayoutConstraint.deactivate(self.constraintsForHiddenTextView)
-        } else {
-            NSLayoutConstraint.deactivate(self.constraintsForVisibleTextView)
-            NSLayoutConstraint.activate(self.constraintsForHiddenTextView)
-        }
-        if self.showsSendButton {
-            NSLayoutConstraint.deactivate(self.constraintsForHiddenSendButton)
-            NSLayoutConstraint.activate(self.constraintsForVisibleSendButton)
-        } else {
-            NSLayoutConstraint.deactivate(self.constraintsForVisibleSendButton)
-            NSLayoutConstraint.activate(self.constraintsForHiddenSendButton)
-        }
+//        if self.showsTextView {
+//            NSLayoutConstraint.activate(self.constraintsForVisibleTextView)
+//            NSLayoutConstraint.deactivate(self.constraintsForHiddenTextView)
+//        } else {
+//            NSLayoutConstraint.deactivate(self.constraintsForVisibleTextView)
+//            NSLayoutConstraint.activate(self.constraintsForHiddenTextView)
+//        }
+//        if self.showsSendButton {
+//            NSLayoutConstraint.deactivate(self.constraintsForHiddenSendButton)
+//            NSLayoutConstraint.activate(self.constraintsForVisibleSendButton)
+//        }
+//        else {
+//            NSLayoutConstraint.deactivate(self.constraintsForVisibleSendButton)
+//            NSLayoutConstraint.activate(self.constraintsForHiddenSendButton)
+//        }
+
+        self.constraintsCloseButtonBottom.constant = self.showsShelf ? 44 : 0
+        self.constraintsTextViewBottom.constant = self.showsShelf ? 54 : 10
+        self.constraintsSendButtonBottom.constant = self.showsShelf ? 44 : 0
+        self.constraionTabSelectorContainerBottom.constant = self.showsShelf ? 0 : -44
+
         super.updateConstraints()
     }
 
@@ -102,6 +139,14 @@ open class ChatInputBar: ReusableXibView {
         }
     }
 
+    open var showsShelf: Bool = true {
+        didSet {
+            self.setNeedsUpdateConstraints()
+            self.setNeedsLayout()
+//            self.updateIntrinsicContentSizeAnimated()
+        }
+    }
+
     open var showsSendButton: Bool = true {
         didSet {
             self.setNeedsUpdateConstraints()
@@ -109,6 +154,7 @@ open class ChatInputBar: ReusableXibView {
             self.updateIntrinsicContentSizeAnimated()
         }
     }
+    public var canBeUpdated:Bool = true
 
     public var maxCharactersCount: UInt? // nil -> unlimited
 
@@ -158,8 +204,14 @@ open class ChatInputBar: ReusableXibView {
         }
     }
 
+    public func textViewIsEmpty() -> Bool {
+        return self.textView.text.isEmpty
+    }
+    
     fileprivate func updateSendButton() {
-        self.sendButton.isEnabled = self.shouldEnableSendButton(self)
+        if canBeUpdated {
+            self.sendButton.isEnabled = self.shouldEnableSendButton(self)
+        }
     }
 
     @IBAction func buttonTapped(_ sender: AnyObject) {
@@ -167,8 +219,154 @@ open class ChatInputBar: ReusableXibView {
         self.delegate?.inputBarSendButtonPressed(self)
     }
 
+    @IBAction func closeButtonTapped(_ sender: Any) {
+        self.showsShelf = !self.showsShelf
+        
+        var showShelfButton = sender as! UIButton
+        
+        var rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
+        
+        var toValue = CGFloat()
+        
+        if self.showsShelf {
+            
+            toValue = CGFloat(M_PI_4)
+            
+        } else {
+            
+            toValue = -CGFloat(M_PI_4)
+            
+        }
+        
+        rotateAnimation = self.rotationAnimation(from: 0.0, to: toValue, duration: 0.3, Additive: true, RemovedOnCompletion: false, fillMode: kCAFillModeForwards)
+        
+        showShelfButton.layer.add(rotateAnimation, forKey: nil)
+    }
+    
+    private func rotationAnimation(from fromValue:CGFloat, to toValue:CGFloat, duration durationValue:CFTimeInterval, Additive isAdditive:Bool,RemovedOnCompletion isRemovedOnCompletion:Bool, fillMode mode:String)->CABasicAnimation {
+        
+        //change to CABasicAnimation because of with UIViewAnimation it can stuck on some point
+        let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
+        rotateAnimation.fromValue = fromValue
+        rotateAnimation.toValue = toValue
+        rotateAnimation.duration = durationValue
+        rotateAnimation.isAdditive = isAdditive //If YES, the value specified by the animation will be added to the current render tree value of the property to produce the new render tree value
+        rotateAnimation.isRemovedOnCompletion = isRemovedOnCompletion //This and subsequent lines are added to keep changes caused by animation
+        rotateAnimation.fillMode = mode
+        
+        return rotateAnimation
+    }
+    
     public func setTextViewPlaceholderAccessibilityIdentifer(_ accessibilityIdentifer: String) {
         self.textView.setTextPlaceholderAccessibilityIdentifier(accessibilityIdentifer)
+    }
+    
+    override open func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(UIResponderStandardEditActions.paste(_:)) || action == #selector(UIResponderStandardEditActions.copy(_:)) {
+            return true
+        }
+        
+        return false
+    }
+
+    public func showPhotosCollectionView(_ value: Bool) {
+        self.constraintsTextViewTop.constant = value ? 120 : 10
+        self.constraintsScrollViewViewTop.constant = value ? 10 : -110
+        self.scrollViewPhotos.isHidden = !value
+    }
+    
+    public func setPhotoItemList(_ list: [(index: IndexPath, url: URL)]) {
+        if list != nil && list.count > 0 {
+            self.showPhotosCollectionView(true)
+        } else {
+            self.showPhotosCollectionView(false)
+        }
+
+        for item in self.scrollViewPhotos.subviews {
+            if item is ChatInputPhotoCell {
+                item.removeFromSuperview()
+            }
+        }
+        
+        var i:Int = 0
+        for item in list {
+            let url:URL = item.url
+            var imageView: ChatInputPhotoCell = ChatInputPhotoCell(frame: CGRect(x: 5 + 150*i, y: 5, width: 144, height: 90))
+            imageView.item = item
+            imageView.delegate = self
+            
+            if url.pathExtension.lowercased() == "pdf" {
+                let img:UIImage? = self.drawPDFfromURL(url: url)
+                
+                if img != nil {
+                    imageView.image = img
+                } else {
+                    imageView.backgroundColor = UIColor(red: 71.0/255.0, green:160.0/255.0, blue:219.0/255.0, alpha: 1.0)
+                }
+            } else {
+                let imgData = try! Data(contentsOf: url)
+                imageView.image = UIImage(data: imgData)
+            }
+            
+            self.scrollViewPhotos.addSubview(imageView)
+            i += 1
+        }
+        
+        self.scrollViewPhotos.contentSize =  CGSize(width: list.count*150 + 10, height: 100)
+        self.scrollViewPhotos.scrollRectToVisible(CGRect(x: self.scrollViewPhotos.contentSize.width - self.scrollViewPhotos.frame.size.width, y: 0, width: self.scrollViewPhotos.frame.size.width, height: self.scrollViewPhotos.frame.size.height), animated: true)
+        self.updateSendButton()
+    }
+    
+    func chatInputPhotoCellDidRemove(cell: ChatInputPhotoCell, item: (index: IndexPath, url: URL)) {
+        self.delegate?.inputBarDidRemovePhoto(self, item: item)
+
+        cell.removeFromSuperview()
+        
+        var i: Int = 0
+        for photoCell in self.scrollViewPhotos.subviews {
+            if photoCell is ChatInputPhotoCell {
+                photoCell.frame = CGRect(x: 5 + 150*i, y: 5, width: 144, height: 90)
+                i += 1
+            }
+        }
+        
+        self.scrollViewPhotos.contentSize =  CGSize(width: i*150 + 10, height: 100)
+
+        if i == 0 {
+            self.showPhotosCollectionView(false)
+        }
+
+        self.updateSendButton()
+    }
+    
+    func drawPDFfromURL(url: URL) -> UIImage? {
+        guard let document = CGPDFDocument(url as CFURL) else { return nil }
+        guard let page = document.page(at: 1) else { return nil }
+        
+        let pageRect = page.getBoxRect(.mediaBox)
+        if #available(iOS 10.0, *) {
+            let renderer = UIGraphicsImageRenderer(size: pageRect.size)
+            let img1 = renderer.jpegData(withCompressionQuality: 1.0, actions: { cnv in
+                UIColor.white.set()
+                cnv.fill(pageRect)
+                cnv.cgContext.translateBy(x: 0.0, y: pageRect.size.height);
+                cnv.cgContext.scaleBy(x: 1.0, y: -1.0);
+                cnv.cgContext.drawPDFPage(page);
+            })
+            let img2 = UIImage(data: img1)
+            return img2
+        } else {
+            if let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil) {
+                let thumbSize = 640
+                let options: [NSString: NSObject] = [
+                    kCGImageSourceThumbnailMaxPixelSize: thumbSize as NSObject,
+                    kCGImageSourceCreateThumbnailFromImageIfAbsent: true as NSObject,
+                    kCGImageSourceCreateThumbnailWithTransform: true as NSObject]
+                return CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
+            }
+        }
+        
+        return nil
     }
 }
 
@@ -181,7 +379,7 @@ extension ChatInputBar: ChatInputItemViewDelegate {
     public func focusOnInputItem(_ inputItem: ChatInputItemProtocol) {
         let shouldFocus = self.delegate?.inputBar(self, shouldFocusOnItem: inputItem) ?? true
         guard shouldFocus else { return }
-
+        
         self.presenter?.onDidReceiveFocusOnItem(inputItem)
         self.delegate?.inputBar(self, didReceiveFocusOnItem: inputItem)
     }
@@ -198,12 +396,12 @@ extension ChatInputBar {
         self.textView.setTextPlaceholder(appearance.textInputAppearance.placeholderText)
         self.tabBarInterItemSpacing = appearance.tabBarAppearance.interItemSpacing
         self.tabBarContentInsets = appearance.tabBarAppearance.contentInsets
-        self.sendButton.contentEdgeInsets = appearance.sendButtonAppearance.insets
-        self.sendButton.setTitle(appearance.sendButtonAppearance.title, for: .normal)
-        appearance.sendButtonAppearance.titleColors.forEach { (state, color) in
-            self.sendButton.setTitleColor(color, for: state.controlState)
-        }
-        self.sendButton.titleLabel?.font = appearance.sendButtonAppearance.font
+//        self.sendButton.contentEdgeInsets = appearance.sendButtonAppearance.insets
+//        self.sendButton.setTitle(appearance.sendButtonAppearance.title, for: .normal)
+//        appearance.sendButtonAppearance.titleColors.forEach { (state, color) in
+//            self.sendButton.setTitleColor(color, for: state.controlState)
+//        }
+//        self.sendButton.titleLabel?.font = appearance.sendButtonAppearance.font
         self.tabBarContainerHeightConstraint.constant = appearance.tabBarAppearance.height
     }
 }
@@ -240,6 +438,7 @@ extension ChatInputBar: UITextViewDelegate {
     }
 
     public func textViewDidBeginEditing(_ textView: UITextView) {
+        textView.tintColor = UIColor(red: 71.0/255.0, green:160.0/255.0, blue:219.0/255.0, alpha: 1.0)
         self.presenter?.onDidBeginEditing()
         self.delegate?.inputBarDidBeginEditing(self)
     }
@@ -258,6 +457,13 @@ extension ChatInputBar: UITextViewDelegate {
             return UInt(nextCount) <= maxCharactersCount
         }
         return true
+    }
+}
+
+// MARK: ExpandableTextViewDelegate
+extension ChatInputBar: ExpandableTextViewDelegate {
+    func didPasteImageWithData(_ imageData: Data) {
+        self.presenter?.onSendImage(imageData)
     }
 }
 
